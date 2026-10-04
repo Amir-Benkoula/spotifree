@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import 'player_state.dart';
@@ -44,17 +46,7 @@ class FullPlayer extends StatelessWidget {
                   children: [
                     _Header(album: state.album, onClose: onClose),
                     Expanded(
-                      child: Center(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          child: DecoratedBox(
-                            decoration: const BoxDecoration(
-                              boxShadow: [BoxShadow(color: Colors.black54, blurRadius: 32, offset: Offset(0, 12))],
-                            ),
-                            child: Artwork(url: state.artwork, radius: 8),
-                          ),
-                        ),
-                      ),
+                      child: _SwipeArtwork(state: state, onNext: bridge.next, onPrevious: bridge.previousTrack),
                     ),
                     _TitleRow(
                       state: state,
@@ -97,6 +89,147 @@ class FullPlayer extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// The cover, swiped sideways to the next track (left) or the previous one
+/// (right), like the official app: it follows the finger, leaves the screen
+/// and comes back in with the new track.
+class _SwipeArtwork extends StatefulWidget {
+  const _SwipeArtwork({required this.state, required this.onNext, required this.onPrevious});
+
+  final PlayerState state;
+  final VoidCallback onNext;
+  final VoidCallback onPrevious;
+
+  @override
+  State<_SwipeArtwork> createState() => _SwipeArtworkState();
+}
+
+class _SwipeArtworkState extends State<_SwipeArtwork> with SingleTickerProviderStateMixin {
+  /// Horizontal offset, in widths of the area: off screen past ±1.
+  late final AnimationController _offset = AnimationController.unbounded(vsync: this);
+  double _width = 1;
+
+  /// While a skip waits for its track: its direction (-1 next, 1 previous) and
+  /// the cover it takes away.
+  double _skip = 0;
+  String _leaving = '';
+  bool _returning = false;
+  TickerFuture? _out;
+  Timer? _giveUp;
+
+  static String _track(PlayerState state) => '${state.title}\n${state.artist}\n${state.artwork}';
+
+  bool _canGo(double direction) => direction < 0 ? widget.state.canNext : widget.state.canPrevious;
+
+  @override
+  void didUpdateWidget(_SwipeArtwork oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (_skip != 0 && _track(widget.state) != _track(oldWidget.state)) _comeBack();
+  }
+
+  @override
+  void dispose() {
+    _giveUp?.cancel();
+    _offset.dispose();
+    super.dispose();
+  }
+
+  void _drag(DragUpdateDetails details) {
+    if (_skip != 0) return;
+    var delta = (details.primaryDelta ?? 0) / _width;
+    final direction = (_offset.value + delta).sign;
+    // Hardly moves where there is nowhere to go.
+    if (direction != 0 && !_canGo(direction)) delta *= 0.25;
+    _offset.value += delta;
+  }
+
+  void _release(DragEndDetails details) {
+    if (_skip != 0) return;
+    final velocity = details.primaryVelocity ?? 0;
+    // Thrown, or dragged far enough.
+    final direction = velocity.abs() > 700
+        ? velocity.sign
+        : _offset.value.abs() > 0.3
+        ? _offset.value.sign
+        : 0.0;
+    if (direction == 0 || !_canGo(direction)) {
+      _settle();
+      return;
+    }
+    setState(() {
+      _skip = direction;
+      _leaving = widget.state.artwork;
+    });
+    _out = _offset.animateTo(direction * 1.2, duration: const Duration(milliseconds: 180), curve: Curves.easeIn);
+    direction < 0 ? widget.onNext() : widget.onPrevious();
+    // The new track usually shows up well before; if not, come back as is.
+    _giveUp = Timer(const Duration(milliseconds: 1500), _comeBack);
+  }
+
+  void _settle() => _offset.animateTo(0, duration: const Duration(milliseconds: 250), curve: Curves.easeOutCubic);
+
+  Future<void> _comeBack() async {
+    if (_skip == 0 || _returning) return;
+    _returning = true;
+    _giveUp?.cancel();
+    final direction = _skip;
+    // Gone first, and the new cover loaded (or not for long), before it comes in.
+    final out = Completer<void>();
+    (_out ?? TickerFuture.complete()).whenCompleteOrCancel(out.complete);
+    final url = widget.state.artwork;
+    await Future.wait([
+      out.future,
+      if (url.isNotEmpty)
+        precacheImage(
+          NetworkImage(url),
+          context,
+          onError: (_, _) {},
+        ).timeout(const Duration(milliseconds: 800), onTimeout: () {}),
+    ]);
+    if (!mounted) return;
+    setState(() {
+      _skip = 0;
+      _returning = false;
+    });
+    _offset.value = -direction * 1.2;
+    _settle();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        _width = constraints.maxWidth;
+        return GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onHorizontalDragUpdate: _drag,
+          onHorizontalDragEnd: _release,
+          onHorizontalDragCancel: () {
+            if (_skip == 0) _settle();
+          },
+          child: AnimatedBuilder(
+            animation: _offset,
+            builder: (context, child) => Transform.translate(
+              offset: Offset(_offset.value * _width, 0),
+              child: Opacity(opacity: (1 - _offset.value.abs() * 0.5).clamp(0.0, 1.0), child: child),
+            ),
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                child: DecoratedBox(
+                  decoration: const BoxDecoration(
+                    boxShadow: [BoxShadow(color: Colors.black54, blurRadius: 32, offset: Offset(0, 12))],
+                  ),
+                  child: Artwork(url: _skip != 0 ? _leaving : widget.state.artwork, radius: 8),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }

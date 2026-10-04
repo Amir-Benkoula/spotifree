@@ -160,9 +160,13 @@
   }
   const clockAt = (now) => clock.positionMs + (clock.playing ? now - clock.positionAt : 0);
 
-  function readElapsed(bar, now) {
+  const elapsedLabel = (bar) => {
     const label = bar ? byTestId('playback-position', bar) : null;
-    const text = label ? label.textContent : null;
+    return label ? label.textContent : null;
+  };
+
+  function readElapsed(bar, now) {
+    const text = elapsedLabel(bar);
     const seconds = parseTime(text);
     const changed = text !== elapsedText;
     if (changed) {
@@ -445,6 +449,14 @@
     return true;
   }
 
+  // Resolves once check() holds, or after timeout ms anyway.
+  const until = (check, timeout) =>
+    new Promise((resolve) => {
+      const end = Date.now() + timeout;
+      const poll = () => (check() || Date.now() >= end ? resolve() : setTimeout(poll, 50));
+      poll();
+    });
+
   const isPlaying = () => playingNow(Date.now());
   const commands = {
     toggle: () => click(barControl('control-button-playpause')) || runAction(isPlaying() ? 'pause' : 'play'),
@@ -452,6 +464,18 @@
     pause: () => runAction('pause') || (isPlaying() && click(barControl('control-button-playpause'))),
     next: () => click(barControl('control-button-skip-forward')) || runAction('nexttrack'),
     previous: () => click(barControl('control-button-skip-back')) || runAction('previoustrack'),
+    // A swipe back always goes to the previous track, while the button only
+    // restarts the current one once it has played a few seconds: go back to
+    // the top first, wait for the bar to show it, then ask for the previous one.
+    previousTrack: () => {
+      const played = clock.positionMs === null ? 0 : clockAt(Date.now());
+      if (played < 1500 || !commands.seek(0)) return commands.previous();
+      until(() => {
+        const seconds = parseTime(elapsedLabel(nowPlayingBar()));
+        return seconds !== null && seconds < 2;
+      }, 1000).then(commands.previous);
+      return true;
+    },
     seek: (ms) => {
       const target = Math.max(0, ms);
       if (!runAction('seekto', { seekTime: target / 1000, fastSeek: false })) return false;

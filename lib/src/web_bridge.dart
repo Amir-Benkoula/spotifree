@@ -53,6 +53,11 @@ class WebBridge {
   Future<bool> pause() => command('pause');
   Future<bool> next() => command('next');
   Future<bool> previous() => command('previous');
+
+  /// The previous track even when the current one has played for a while,
+  /// where [previous] restarts it, like the player's button.
+  Future<bool> previousTrack() => command('previousTrack');
+
   Future<bool> seek(Duration position) => command('seek', position.inMilliseconds);
   Future<bool> toggleShuffle() => command('shuffle');
   Future<bool> cycleRepeat() => command('repeat');
