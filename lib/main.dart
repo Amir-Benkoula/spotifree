@@ -1,4 +1,5 @@
 import 'package:audio_service/audio_service.dart';
+import 'package:audio_session/audio_session.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -13,11 +14,21 @@ Future<void> main() async {
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
   final bridge = WebBridge();
+  final session = await AudioSession.instance;
+  await session.configure(const AudioSessionConfiguration.music());
   await AudioService.init(
-    builder: () => WebPlayerAudioHandler(bridge),
+    builder: () => WebPlayerAudioHandler(
+      bridge,
+      interruptions: session.interruptionEventStream,
+      setAudioActive: session.setActive,
+    ),
     config: const AudioServiceConfig(
       androidNotificationChannelId: 'com.amirbenkoula.spotiweb.playback',
       androidNotificationChannelName: 'Lecture',
+      // White on transparent, with a color: some devices draw the notification's
+      // seek bar only then (android/app/src/main/res/drawable/).
+      androidNotificationIcon: 'drawable/ic_stat_music',
+      notificationColor: spotifyGreen,
       // Stay in the foreground while paused: Android 12+ forbids restarting a
       // foreground service from the background (e.g. a Bluetooth play button).
       androidStopForegroundOnPause: false,

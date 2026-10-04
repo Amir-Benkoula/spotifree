@@ -12,6 +12,8 @@ dependencies:
     sdk: flutter
 
   audio_service: ^0.18.19
+  # Audio focus (already pulled in by audio_service).
+  audio_session: ^0.2.4
 
 dev_dependencies:
   flutter_test:
