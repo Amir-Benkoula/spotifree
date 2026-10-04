@@ -1,0 +1,66 @@
+package com.amirbenkoula.spotiweb
+
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import android.media.AudioManager
+import android.os.Build
+import com.ryanheise.audioservice.AudioServiceActivity
+import io.flutter.embedding.engine.FlutterEngine
+import io.flutter.plugin.common.MethodChannel
+
+// AudioServiceActivity shares its FlutterEngine with the playback service.
+class MainActivity : AudioServiceActivity() {
+    private var channel: MethodChannel? = null
+
+    // Headphones unplugged / Bluetooth audio lost: the page doesn't pause by itself.
+    private val noisyReceiver =
+        object : BroadcastReceiver() {
+            override fun onReceive(context: Context, intent: Intent) {
+                if (intent.action == AudioManager.ACTION_AUDIO_BECOMING_NOISY) {
+                    channel?.invokeMethod("becomingNoisy", null)
+                }
+            }
+        }
+
+    override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
+        super.configureFlutterEngine(flutterEngine)
+        // The engine outlives activities (audio_service caches it): its view
+        // factory can only be registered once.
+        if (player?.engine !== flutterEngine) {
+            val playerChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "spotiweb/player")
+            player =
+                GeckoPlayer(applicationContext, playerChannel, flutterEngine).also {
+                    flutterEngine.platformViewsController.registry.registerViewFactory(GeckoPlayer.VIEW_TYPE, it)
+                }
+        }
+
+        channel =
+            MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "spotiweb/system").apply {
+                setMethodCallHandler { call, result ->
+                    when (call.method) {
+                        "moveTaskToBack" -> result.success(moveTaskToBack(true))
+                        else -> result.notImplemented()
+                    }
+                }
+            }
+
+        val filter = IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(noisyReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
+        } else {
+            registerReceiver(noisyReceiver, filter)
+        }
+    }
+
+    override fun onDestroy() {
+        unregisterReceiver(noisyReceiver)
+        channel?.setMethodCallHandler(null)
+        super.onDestroy()
+    }
+
+    companion object {
+        private var player: GeckoPlayer? = null
+    }
+}

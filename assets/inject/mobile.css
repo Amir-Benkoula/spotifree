@@ -1,0 +1,168 @@
+/*
+ * Reshapes the desktop web player into a single-column phone layout.
+ *
+ * Hooks only on stable ids/data-testid (class names are hashed per build):
+ *   grid      div:has(> #main-view)   areas: global-nav / left-sidebar main-view right-sidebar / now-playing-bar
+ *   library   #Desktop_LeftSidebar_Id           shown full screen with html.sw-library
+ *   panels    div:has(#Desktop_PanelContainer_Id) shown full screen with html.sw-panel (queue, lyrics…)
+ *   player    [data-testid="now-playing-bar"]   kept rendered off-screen, replaced by the native player
+ *   search    #global-nav-bar                   shown as a search bar on /search (html.sw-search)
+ */
+
+/* ------------------------------------------------------------------ base */
+html,
+body {
+  min-width: 0 !important;
+  min-height: 0 !important;
+  overscroll-behavior: none;
+  -webkit-tap-highlight-color: transparent;
+}
+body {
+  background: #000 !important;
+}
+* {
+  -webkit-touch-callout: none;
+  scrollbar-width: none !important;
+}
+::-webkit-scrollbar {
+  display: none !important;
+}
+/* No long-press text selection outside of form fields. */
+body :not(input):not(textarea):not([contenteditable='true']) {
+  -webkit-user-select: none;
+  user-select: none;
+}
+[draggable='true'] {
+  -webkit-user-drag: none;
+}
+/* Blur is the most expensive effect on phone GPUs. */
+*,
+*::before,
+*::after {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+[data-testid='root'] {
+  --panel-gap: 0px !important;
+}
+
+/* ------------------------------------------------------------------ grid */
+div:has(> #main-view) {
+  grid-template:
+    'top-banner top-banner top-banner' auto
+    'global-nav global-nav global-nav' auto
+    'left-sidebar main-view right-sidebar' minmax(0, 1fr)
+    'now-playing-bar now-playing-bar now-playing-bar' auto
+    / 0 minmax(0, 1fr) 0 !important;
+  gap: 0 !important;
+  padding: 0 !important;
+}
+#main-view {
+  grid-area: main-view !important;
+  border-radius: 0 !important;
+}
+
+/* Desktop chrome that has a native equivalent (system back, bottom bar),
+   hover tooltips that stick after a tap, and custom scrollbars. */
+[data-testid='top-bar-back-button'],
+[data-testid='top-bar-forward-button'],
+[data-testid='LayoutResizer__resize-bar'],
+[data-testid='signup-bar'],
+[data-testid='hover-or-focus-tooltip'],
+.os-scrollbar {
+  display: none !important;
+}
+
+/* ------------------------------------------------------------ now playing */
+/* Kept rendered at a desktop width so every control exists (the native
+   player clicks them), but moved out of sight. */
+div:has(> #main-view) > div:has([data-testid='now-playing-bar']) {
+  position: absolute !important;
+  top: 0 !important;
+  left: -1400px !important;
+  width: 1200px !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+/* ------------------------------------------------------------- global nav */
+#global-nav-bar {
+  display: none !important;
+}
+html.sw-search #global-nav-bar {
+  display: flex !important;
+  height: auto !important;
+  min-height: 0 !important;
+  padding: 10px 12px !important;
+  background: #000 !important;
+}
+/* Only the search field: no logo, home button, account or install buttons. */
+html.sw-search #global-nav-bar > :not(:has(form)),
+html.sw-search #global-nav-bar [data-testid='home-button'] {
+  display: none !important;
+}
+/* The player collapses the field to an icon on narrow screens: stretch it back. */
+html.sw-search #global-nav-bar div:has(form),
+html.sw-search #global-nav-bar form,
+html.sw-search #global-nav-bar div:has(> [data-testid='search-input']) {
+  flex: 1 1 auto !important;
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0 !important;
+}
+html.sw-search [data-testid='search-input'] {
+  width: 100% !important;
+  font-size: 16px !important;
+}
+
+/* --------------------------------------------------------------- library */
+div:has(+ #Desktop_LeftSidebar_Id),
+#Desktop_LeftSidebar_Id {
+  display: none !important;
+}
+/* An absolutely positioned grid child is sized by its grid area: span them all. */
+html.sw-library #Desktop_LeftSidebar_Id {
+  display: flex !important;
+  grid-area: 1 / 1 / -1 / -1 !important;
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 20 !important;
+  width: 100% !important;
+  border-radius: 0 !important;
+  background: #121212 !important;
+}
+
+/* ----------------------------------------------------------- side panels */
+div:has(> #main-view) > div:has(#Desktop_PanelContainer_Id) {
+  display: none !important;
+}
+html.sw-panel div:has(> #main-view) > div:has(#Desktop_PanelContainer_Id) {
+  display: flex !important;
+  grid-area: 1 / 1 / -1 / -1 !important;
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 20 !important;
+  width: 100% !important;
+  margin: 0 !important;
+}
+html.sw-panel #Desktop_PanelContainer_Id {
+  width: 100% !important;
+  max-width: none !important;
+  border-radius: 0 !important;
+}
+#lyrics-cinema {
+  grid-area: 1 / 1 / -1 / -1 !important;
+}
+
+/* --------------------------------------------------------- cookie banner */
+#onetrust-banner-sdk {
+  box-sizing: border-box !important;
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+#onetrust-banner-sdk * {
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}

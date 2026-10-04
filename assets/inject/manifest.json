@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "SpotiWeb",
+  "description": "Mobile layout and native bridge for open.spotify.com, built into the app.",
+  "version": "1.0",
+  "browser_specific_settings": {
+    "gecko": { "id": "spotiweb@amirbenkoula.com" }
+  },
+  "permissions": ["nativeMessaging", "nativeMessagingFromContent", "geckoViewAddons"],
+  "host_permissions": ["https://open.spotify.com/*"],
+  "content_scripts": [
+    {
+      "matches": ["https://open.spotify.com/*"],
+      "js": ["bootstrap.js"],
+      "run_at": "document_start",
+      "world": "MAIN"
+    },
+    {
+      "matches": ["https://open.spotify.com/*"],
+      "js": ["relay.js"],
+      "css": ["mobile.css"],
+      "run_at": "document_start"
+    }
+  ]
+}

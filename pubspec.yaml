@@ -1,0 +1,27 @@
+name: spotiweb
+description: "Spotify web player, interface mobile"
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.13.3
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  audio_service: ^0.18.19
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    # Built-in GeckoView extension (manifest.json): script and stylesheet
+    # injected into open.spotify.com.
+    - assets/inject/
