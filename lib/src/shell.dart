@@ -3,70 +3,113 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'app_actions.dart';
 import 'full_player.dart';
+import 'home_screen.dart';
+import 'library_screen.dart';
+import 'lyrics_screen.dart';
+import 'menu_sheet.dart';
 import 'mini_player.dart';
+import 'page_screen.dart';
 import 'player_state.dart';
+import 'queue_screen.dart';
+import 'search_screen.dart';
+import 'settings_sheet.dart';
 import 'spotify_web_view.dart';
 import 'system_channel.dart';
 import 'web_bridge.dart';
+import 'web_content.dart';
+import 'web_data.dart';
 import 'widgets.dart';
 
 enum _Tab { home, search, library }
 
-/// The web player plus the native chrome around it: bottom navigation,
-/// mini player and the full screen player that slides over everything.
+/// The app: its own screens (home, search, library and the pages they lead
+/// to) over the web player, which keeps running out of sight behind them and
+/// is where everything they show comes from; the mini player, and the full
+/// screen player that slides over everything.
+///
+/// The web player itself shows for logging in, for what the app has no screen
+/// for, and as the whole interface when chosen in the settings (with the
+/// bottom navigation and players around it, as the app first was).
 class Shell extends StatefulWidget {
-  const Shell({super.key, required this.bridge});
+  const Shell({super.key, required this.bridge, @visibleForTesting this.webView});
 
   final WebBridge bridge;
+
+  /// In place of the web view (tests, which have none).
+  final Widget? webView;
 
   @override
   State<Shell> createState() => _ShellState();
 }
 
-class _ShellState extends State<Shell> with SingleTickerProviderStateMixin {
+class _ShellState extends State<Shell> with SingleTickerProviderStateMixin implements AppActions {
   late final AnimationController _player = AnimationController(
     vsync: this,
     duration: const Duration(milliseconds: 300),
   );
 
-  WebBridge get _bridge => widget.bridge;
+  @override
+  WebBridge get bridge => widget.bridge;
+
+  @override
+  late final WebContent content = WebContent(widget.bridge);
 
   /// False on the login pages (accounts.spotify.com…), which get the whole screen.
   bool _onPlayer = true;
   bool _splashTimedOut = false;
   late final Timer _splashTimer;
+  StreamSubscription<String>? _notices;
 
-  /// Tab to highlight on pages that belong to none (a playlist, an artist…).
+  /// The web player keeps its place in the tree whatever shows over it.
+  final _webView = GlobalKey();
+
+  // The app's own screens: a navigator per tab, each built once first shown.
+  _Tab _tab = _Tab.home;
+  final _visited = <_Tab>{_Tab.home};
+  final _navigators = {for (final tab in _Tab.values) tab: GlobalKey<NavigatorState>()};
+  final _libraryShown = ValueNotifier<int>(0);
+
+  /// The web page shown in place of the app's screens.
+  bool _webShown = false;
+
+  /// Web interface: tab to highlight on pages that belong to none (a playlist…).
   _Tab _lastTab = _Tab.home;
 
   @override
   void initState() {
     super.initState();
     _splashTimer = Timer(const Duration(seconds: 10), () => setState(() => _splashTimedOut = true));
-    _bridge.state.addListener(_onState);
-    _bridge.location.addListener(_onLocationChanged);
+    bridge.state.addListener(_onState);
+    bridge.location.addListener(_onLocationChanged);
+    _notices = bridge.notices.listen(notify);
   }
 
   @override
   void dispose() {
-    _bridge.state.removeListener(_onState);
-    _bridge.location.removeListener(_onLocationChanged);
+    bridge.state.removeListener(_onState);
+    bridge.location.removeListener(_onLocationChanged);
+    _notices?.cancel();
     _splashTimer.cancel();
+    _libraryShown.dispose();
     _player.dispose();
     super.dispose();
   }
 
   void _onState() {
-    if (!_bridge.state.value.hasTrack && _player.value > 0) _player.value = 0;
+    if (!bridge.state.value.hasTrack && _player.value > 0) _player.value = 0;
   }
 
   void _onLocationChanged() {
-    final url = _bridge.location.value;
+    final url = bridge.location.value;
     if (url == null) return;
     final onPlayer = url.host == 'open.spotify.com';
     if (onPlayer != _onPlayer) setState(() => _onPlayer = onPlayer);
   }
+
+  /// The app's own screens, unless the web interface is chosen or a login is due.
+  bool _native(PlayerState state) => _onPlayer && !state.webUi && state.loggedIn != false;
 
   // ------------------------------------------------------------ full player
   void _openPlayer() => _player.animateTo(1, curve: Curves.easeOutCubic);
@@ -87,37 +130,165 @@ class _ShellState extends State<Shell> with SingleTickerProviderStateMixin {
     }
   }
 
+  // ---------------------------------------------------------- app actions
+  /// Back to the tabs: what shows over them closes.
+  void _closeOverlays() {
+    Navigator.of(context).popUntil((route) => route.isFirst);
+    if (_player.value > 0) _closePlayer();
+  }
+
+  @override
+  void openPath(String path, {WebCard? preview}) {
+    if (path.isEmpty) return;
+    if (!appPageKinds.contains(kindOfPath(path))) {
+      openWeb(path: path);
+      return;
+    }
+    _closeOverlays();
+    if (_webShown) setState(() => _webShown = false);
+    _navigators[_tab]!.currentState?.push(
+      MaterialPageRoute<void>(
+        builder: (_) => PageScreen(app: this, path: path, preview: preview),
+      ),
+    );
+  }
+
+  @override
+  void openWeb({String? path, String? view}) {
+    _closeOverlays();
+    content.showWeb(path: path, view: view);
+    setState(() => _webShown = true);
+  }
+
+  void _closeWeb() => setState(() => _webShown = false);
+
+  @override
+  void openQueue() => Navigator.of(context).push(_slideUp((_) => QueueScreen(app: this)));
+
+  @override
+  void openLyrics() => Navigator.of(context).push(_slideUp((_) => LyricsScreen(app: this)));
+
+  // Not opaque: the web player under it must keep being drawn.
+  Route<void> _slideUp(WidgetBuilder builder) => PageRouteBuilder<void>(
+    opaque: false,
+    transitionDuration: const Duration(milliseconds: 300),
+    reverseTransitionDuration: const Duration(milliseconds: 250),
+    pageBuilder: (context, _, _) => builder(context),
+    transitionsBuilder: (context, animation, _, child) => SlideTransition(
+      position: Tween(
+        begin: const Offset(0, 1),
+        end: Offset.zero,
+      ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOutCubic)),
+      child: child,
+    ),
+  );
+
+  @override
+  void openSettings() => showSettings(context, this);
+
+  @override
+  Future<void> showMenu(MenuTarget target, {String? path, MenuHeader? header}) =>
+      showWebMenu(context, this, target, path: path, header: header);
+
+  @override
+  void notify(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(message),
+          behavior: SnackBarBehavior.floating,
+          margin: const EdgeInsets.fromLTRB(16, 0, 16, 132),
+          duration: const Duration(seconds: 3),
+        ),
+      );
+  }
+
   // ------------------------------------------------------------- navigation
-  _Tab _selectedTab(PlayerState state) {
+  void _selectNativeTab(_Tab tab) {
+    if (_webShown) _closeWeb();
+    if (tab == _tab) {
+      // Again on the tab: back to its first screen.
+      _navigators[tab]!.currentState?.popUntil((route) => route.isFirst);
+    }
+    if (tab == _Tab.library) _libraryShown.value++;
+    setState(() {
+      _tab = tab;
+      _visited.add(tab);
+    });
+  }
+
+  Widget _rootScreen(_Tab tab) => switch (tab) {
+    _Tab.home => HomeScreen(app: this),
+    _Tab.search => SearchScreen(app: this),
+    _Tab.library => LibraryScreen(app: this, shown: _libraryShown),
+  };
+
+  Widget _nativeTabs() {
+    return ColoredBox(
+      color: Colors.black,
+      child: IndexedStack(
+        index: _tab.index,
+        children: [
+          for (final tab in _Tab.values)
+            if (_visited.contains(tab))
+              Navigator(
+                key: _navigators[tab],
+                onGenerateRoute: (settings) =>
+                    MaterialPageRoute<void>(settings: settings, builder: (_) => _rootScreen(tab)),
+              )
+            else
+              const SizedBox.shrink(),
+        ],
+      ),
+    );
+  }
+
+  _Tab _selectedWebTab(PlayerState state) {
     if (state.library) return _Tab.library;
     if (state.isSearchRoute) return _Tab.search;
     if (state.isHomeRoute) return _Tab.home;
     return _lastTab;
   }
 
-  void _selectTab(_Tab tab) {
+  void _selectWebTab(_Tab tab) {
     setState(() => _lastTab = tab);
     switch (tab) {
       case _Tab.home:
-        _bridge.goHome();
+        bridge.goHome();
       case _Tab.search:
-        _bridge.openSearch();
+        bridge.openSearch();
       case _Tab.library:
-        _bridge.showLibrary(true);
+        bridge.showLibrary(true);
     }
   }
 
-  /// Back closes what is on top first, then walks the page history, and finally
-  /// sends the app to the background (finishing it would stop the music).
+  /// Back closes what is on top first, then goes back through the screens
+  /// (or the page history), and finally sends the app to the background
+  /// (finishing it would stop the music).
   Future<void> _handleBack() async {
-    final state = _bridge.state.value;
+    final state = bridge.state.value;
     if (_player.value > 0) {
       _closePlayer();
+      return;
+    }
+    if (_native(state)) {
+      final navigator = _navigators[_tab]!.currentState;
+      if (_webShown) {
+        _closeWeb();
+      } else if (navigator != null && navigator.canPop()) {
+        navigator.pop();
+      } else if (_tab != _Tab.home) {
+        _selectNativeTab(_Tab.home);
+      } else {
+        await SystemChannel.moveTaskToBack();
+      }
     } else if (state.panel) {
-      await _bridge.closePanel();
+      await bridge.closePanel();
     } else if (state.library) {
-      await _bridge.showLibrary(false);
-    } else if (!await _bridge.goBack()) {
+      await bridge.showLibrary(false);
+    } else if (!await bridge.goBack()) {
       await SystemChannel.moveTaskToBack();
     }
   }
@@ -140,28 +311,67 @@ class _ShellState extends State<Shell> with SingleTickerProviderStateMixin {
         child: Scaffold(
           backgroundColor: Colors.black,
           body: ValueListenableBuilder<PlayerState>(
-            valueListenable: _bridge.state,
-            // The WebView is built once and passed through, never rebuilt by state changes.
-            child: SpotifyWebView(bridge: _bridge),
+            valueListenable: bridge.state,
+            // The web view is built once and passed through, never rebuilt by state changes.
+            child: KeyedSubtree(
+              key: _webView,
+              child: widget.webView ?? SpotifyWebView(bridge: bridge),
+            ),
             builder: (context, state, webView) {
+              final native = _native(state);
               final chrome = _onPlayer && !keyboardOpen;
               return Stack(
                 children: [
                   Column(
                     children: [
                       Expanded(
-                        child: SafeArea(bottom: !chrome, child: webView!),
+                        child: Stack(
+                          children: [
+                            Positioned.fill(
+                              child: SafeArea(bottom: !chrome, child: webView!),
+                            ),
+                            if (native)
+                              Positioned.fill(
+                                child: Offstage(
+                                  offstage: _webShown,
+                                  child: MediaQuery.removePadding(
+                                    context: context,
+                                    removeBottom: chrome,
+                                    child: _nativeTabs(),
+                                  ),
+                                ),
+                              ),
+                            if (native && _webShown)
+                              Positioned(
+                                right: 12,
+                                bottom: 12,
+                                child: FloatingActionButton.extended(
+                                  heroTag: null,
+                                  onPressed: _closeWeb,
+                                  backgroundColor: Colors.white,
+                                  foregroundColor: Colors.black,
+                                  icon: const Icon(Icons.arrow_back_rounded),
+                                  label: const Text("Retour à l'app"),
+                                ),
+                              ),
+                          ],
+                        ),
                       ),
                       if (chrome && state.hasTrack)
                         MiniPlayer(
-                          bridge: _bridge,
+                          bridge: bridge,
                           state: state,
                           onOpen: _openPlayer,
                           onDragUpdate: _dragPlayer,
                           onDragEnd: _endDragPlayer,
                         ),
-                      if (chrome && state.loggedIn == false) _LoginBanner(onLogin: _bridge.login),
-                      if (chrome) _BottomNav(selected: _selectedTab(state), onSelected: _selectTab),
+                      if (chrome && state.loggedIn == false) _LoginBanner(onLogin: bridge.login),
+                      if (chrome)
+                        _BottomNav(
+                          selected: native ? _tab : _selectedWebTab(state),
+                          onSelected: native ? _selectNativeTab : _selectWebTab,
+                          onSettings: native ? null : openSettings,
+                        ),
                     ],
                   ),
                   if (_onPlayer && !state.appReady && !_splashTimedOut) const Positioned.fill(child: _Splash()),
@@ -169,18 +379,24 @@ class _ShellState extends State<Shell> with SingleTickerProviderStateMixin {
                     AnimatedBuilder(
                       animation: _player,
                       child: FullPlayer(
-                        bridge: _bridge,
+                        bridge: bridge,
                         onClose: _closePlayer,
                         onDragUpdate: _dragPlayer,
                         onDragEnd: _endDragPlayer,
+                        onQueue: native ? openQueue : null,
+                        onLyrics: native ? openLyrics : null,
+                        onOpenPath: native ? openPath : null,
+                        onMenu: native
+                            ? () => showMenu(
+                                const NowPlayingTarget(),
+                                header: MenuHeader(title: state.title, subtitle: state.artist, image: state.artwork),
+                              )
+                            : null,
                       ),
                       builder: (context, child) {
                         if (_player.value == 0) return const SizedBox.shrink();
                         return Positioned.fill(
-                          child: FractionalTranslation(
-                            translation: Offset(0, 1 - _player.value),
-                            child: child,
-                          ),
+                          child: FractionalTranslation(translation: Offset(0, 1 - _player.value), child: child),
                         );
                       },
                     ),
@@ -195,10 +411,13 @@ class _ShellState extends State<Shell> with SingleTickerProviderStateMixin {
 }
 
 class _BottomNav extends StatelessWidget {
-  const _BottomNav({required this.selected, required this.onSelected});
+  const _BottomNav({required this.selected, required this.onSelected, this.onSettings});
 
   final _Tab selected;
   final ValueChanged<_Tab> onSelected;
+
+  /// Web interface: the settings have no other way in.
+  final VoidCallback? onSettings;
 
   static const _items = [
     (_Tab.home, Icons.home_filled, Icons.home_outlined, 'Accueil'),
@@ -209,6 +428,29 @@ class _BottomNav extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final labelStyle = Theme.of(context).textTheme.labelSmall;
+    Widget item({
+      required bool isSelected,
+      required IconData icon,
+      required String label,
+      required VoidCallback onTap,
+    }) {
+      final color = isSelected ? Colors.white : Colors.white60;
+      return Expanded(
+        child: InkResponse(
+          onTap: onTap,
+          radius: 36,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, color: color, size: 26),
+              const SizedBox(height: 3),
+              Text(label, style: labelStyle?.copyWith(color: color)),
+            ],
+          ),
+        ),
+      );
+    }
+
     return ColoredBox(
       color: Colors.black,
       child: SafeArea(
@@ -218,26 +460,14 @@ class _BottomNav extends StatelessWidget {
           child: Row(
             children: [
               for (final (tab, activeIcon, icon, label) in _items)
-                Expanded(
-                  child: InkResponse(
-                    onTap: () => onSelected(tab),
-                    radius: 36,
-                    child: Builder(
-                      builder: (context) {
-                        final isSelected = tab == selected;
-                        final color = isSelected ? Colors.white : Colors.white60;
-                        return Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(isSelected ? activeIcon : icon, color: color, size: 26),
-                            const SizedBox(height: 3),
-                            Text(label, style: labelStyle?.copyWith(color: color)),
-                          ],
-                        );
-                      },
-                    ),
-                  ),
+                item(
+                  isSelected: tab == selected,
+                  icon: tab == selected ? activeIcon : icon,
+                  label: label,
+                  onTap: () => onSelected(tab),
                 ),
+              if (onSettings != null)
+                item(isSelected: false, icon: Icons.settings_outlined, label: 'Réglages', onTap: onSettings!),
             ],
           ),
         ),
@@ -292,10 +522,7 @@ class _Splash extends StatelessWidget {
           children: [
             Icon(Icons.graphic_eq_rounded, size: 64, color: spotifyGreen),
             SizedBox(height: 24),
-            SizedBox.square(
-              dimension: 24,
-              child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white54),
-            ),
+            SizedBox.square(dimension: 24, child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white54)),
           ],
         ),
       ),

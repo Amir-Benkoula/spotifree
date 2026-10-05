@@ -14,12 +14,36 @@ class FullPlayer extends StatelessWidget {
     required this.onClose,
     required this.onDragUpdate,
     required this.onDragEnd,
+    this.onQueue,
+    this.onLyrics,
+    this.onOpenPath,
+    this.onMenu,
   });
 
   final WebBridge bridge;
   final VoidCallback onClose;
   final GestureDragUpdateCallback onDragUpdate;
   final GestureDragEndCallback onDragEnd;
+
+  /// The app's own queue and lyrics screens; without them, the web page's.
+  final VoidCallback? onQueue;
+  final VoidCallback? onLyrics;
+
+  /// Opens a page (the track's album, artist) on the app's own screen.
+  final void Function(String path)? onOpenPath;
+
+  /// The track's menu, as the page has it.
+  final VoidCallback? onMenu;
+
+  void _openArtist(PlayerState state) {
+    final open = onOpenPath;
+    if (open != null && state.artists.isNotEmpty) {
+      open(state.artists.first.path);
+    } else {
+      onClose();
+      bridge.openArtist();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,17 +68,23 @@ class FullPlayer extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 24),
                 child: Column(
                   children: [
-                    _Header(album: state.album, adBlock: state.adBlock, onClose: onClose, onAdBlock: bridge.setAdBlock),
+                    _Header(
+                      album: state.album,
+                      adBlock: state.adBlock,
+                      onClose: onClose,
+                      onAdBlock: bridge.setAdBlock,
+                      onAlbum: onOpenPath == null || state.albumPath.isEmpty
+                          ? null
+                          : () => onOpenPath!(state.albumPath),
+                    ),
                     Expanded(
                       child: _SwipeArtwork(state: state, onNext: bridge.next, onPrevious: bridge.previousTrack),
                     ),
                     _TitleRow(
                       state: state,
                       onLike: bridge.toggleLike,
-                      onArtist: () {
-                        onClose();
-                        bridge.openArtist();
-                      },
+                      onArtist: () => _openArtist(state),
+                      onMenu: onMenu,
                     ),
                     const SizedBox(height: 12),
                     _SeekBar(state: state, onSeek: bridge.seek),
@@ -66,18 +96,22 @@ class FullPlayer extends StatelessWidget {
                         IconButton(
                           tooltip: 'Paroles',
                           icon: const Icon(Icons.lyrics_outlined),
-                          onPressed: () {
-                            onClose();
-                            bridge.openLyrics();
-                          },
+                          onPressed:
+                              onLyrics ??
+                              () {
+                                onClose();
+                                bridge.openLyrics();
+                              },
                         ),
                         IconButton(
                           tooltip: "File d'attente",
                           icon: const Icon(Icons.queue_music_rounded),
-                          onPressed: () {
-                            onClose();
-                            bridge.openQueue();
-                          },
+                          onPressed:
+                              onQueue ??
+                              () {
+                                onClose();
+                                bridge.openQueue();
+                              },
                         ),
                       ],
                     ),
@@ -235,12 +269,19 @@ class _SwipeArtworkState extends State<_SwipeArtwork> with SingleTickerProviderS
 }
 
 class _Header extends StatelessWidget {
-  const _Header({required this.album, required this.adBlock, required this.onClose, required this.onAdBlock});
+  const _Header({
+    required this.album,
+    required this.adBlock,
+    required this.onClose,
+    required this.onAdBlock,
+    this.onAlbum,
+  });
 
   final String album;
   final bool adBlock;
   final VoidCallback onClose;
   final ValueChanged<bool> onAdBlock;
+  final VoidCallback? onAlbum;
 
   @override
   Widget build(BuildContext context) {
@@ -263,11 +304,14 @@ class _Header extends StatelessWidget {
                   style: textTheme.labelSmall?.copyWith(letterSpacing: 1.2, color: Colors.white70),
                 ),
                 const SizedBox(height: 2),
-                Text(
-                  album,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
+                GestureDetector(
+                  onTap: onAlbum,
+                  child: Text(
+                    album,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
+                  ),
                 ),
               ],
             ),
@@ -291,11 +335,12 @@ class _Header extends StatelessWidget {
 }
 
 class _TitleRow extends StatelessWidget {
-  const _TitleRow({required this.state, required this.onLike, required this.onArtist});
+  const _TitleRow({required this.state, required this.onLike, required this.onArtist, this.onMenu});
 
   final PlayerState state;
   final VoidCallback onLike;
   final VoidCallback onArtist;
+  final VoidCallback? onMenu;
 
   @override
   Widget build(BuildContext context) {
@@ -333,6 +378,8 @@ class _TitleRow extends StatelessWidget {
                 ? const Icon(Icons.check_circle_rounded, color: spotifyGreen)
                 : const Icon(Icons.add_circle_outline_rounded),
           ),
+        if (onMenu != null && !state.isAd)
+          IconButton(tooltip: "Plus d'options", onPressed: onMenu, icon: const Icon(Icons.more_horiz_rounded)),
       ],
     );
   }

@@ -1,3 +1,5 @@
+import 'web_data.dart';
+
 /// Repeat button state, from its aria-checked attribute.
 enum RepeatState { off, all, one }
 
@@ -8,11 +10,16 @@ class PlayerState {
     this.loggedIn,
     this.avatar = '',
     this.path = '/',
+    this.webUi = false,
     this.hasTrack = false,
     this.title = '',
     this.artist = '',
     this.album = '',
     this.artwork = '',
+    this.trackUri = '',
+    this.albumPath = '',
+    this.artists = const [],
+    this.contextPath = '',
     this.isAd = false,
     this.adBlock = false,
     this.playing = false,
@@ -42,11 +49,16 @@ class PlayerState {
       loggedIn: json['loggedIn'] as bool?,
       avatar: text('avatar'),
       path: json['path'] as String? ?? '/',
+      webUi: flag('webUi'),
       hasTrack: flag('hasTrack'),
       title: text('title'),
       artist: text('artist'),
       album: text('album'),
       artwork: text('artwork'),
+      trackUri: text('trackUri'),
+      albumPath: text('albumPath'),
+      artists: WebLink.listFrom(json['artists']),
+      contextPath: text('contextPath'),
       isAd: flag('isAd'),
       adBlock: flag('adBlock'),
       playing: flag('playing'),
@@ -77,11 +89,23 @@ class PlayerState {
   final String avatar;
   final String path;
 
+  /// The app shows the web page rather than its own screens (a setting).
+  final bool webUi;
+
   final bool hasTrack;
   final String title;
   final String artist;
   final String album;
   final String artwork;
+
+  /// spotify:track:… (or episode), when the player bar links to it.
+  final String trackUri;
+
+  /// Pages of the track playing: its album, its artists, what it plays from.
+  final String albumPath;
+  final List<WebLink> artists;
+  final String contextPath;
+
   final bool isAd;
 
   /// Ads are cut short by the page (assets/inject/bootstrap.js).
