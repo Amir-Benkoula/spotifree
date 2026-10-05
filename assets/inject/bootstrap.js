@@ -8,6 +8,7 @@
 //    worked out from the media it plays and from the (hidden) desktop player bar.
 // 2. Answers commands from the native UI (window.__spotiweb.cmd(name, arg)).
 // 3. Adapts touch interactions (a tap on a track plays it, like the mobile app).
+// 4. Cuts ads short (Spotify Free), unless turned off.
 //
 // Messages go through relay.js (isolated world, which can reach the app):
 // 'spotiweb:out' events to the app, 'spotiweb:in' events from it.
@@ -75,6 +76,7 @@
   // page. Muted ones (cover videos) don't count.
   const players = new Set(); // WeakRefs: elements the page drops can go.
   const watched = new WeakSet();
+  const loads = new WeakMap(); // Element -> number of sources it loaded.
   let heardAt = 0; // Last time an element was heard playing.
   let pausedAt = 0; // Last time one was paused on purpose (not by its end).
 
@@ -91,16 +93,27 @@
       return;
     }
     if (event.type === 'pause' && !el.muted && !el.ended) pausedAt = Date.now();
+    if (event.type === 'loadstart') loads.set(el, (loads.get(el) || 0) + 1);
     scheduleState();
   }
+
+  const MEDIA_EVENTS = [
+    'loadstart',
+    'durationchange',
+    'play',
+    'playing',
+    'pause',
+    'ended',
+    'emptied',
+    'volumechange',
+    'timeupdate',
+  ];
 
   function watchMedia(el) {
     if (!(el instanceof HTMLMediaElement) || watched.has(el)) return;
     watched.add(el);
     players.add(new WeakRef(el));
-    for (const type of ['play', 'pause', 'ended', 'emptied', 'volumechange', 'timeupdate']) {
-      el.addEventListener(type, onMediaEvent);
-    }
+    for (const type of MEDIA_EVENTS) el.addEventListener(type, onMediaEvent);
   }
 
   const nativeCreateElement = Document.prototype.createElement;
@@ -130,6 +143,115 @@
     if (pausedAt >= heardAt || now - heardAt >= TRACK_GAP_MS) return false;
     recheckIn(TRACK_GAP_MS - (now - heardAt));
     return true;
+  }
+
+  // ------------------------------------------------------------------ ad block
+  // Spotify Free plays ads between tracks. Blocking their requests leaves the
+  // player stuck ("your music will continue after the break"), so ads are let
+  // in and cut short: muted at once, then taken to their end, after which the
+  // player moves on as if they had played. Meanwhile the page sees the element
+  // as it set it (not muted, normal speed), should it hold such an ad back.
+  //
+  // The bar may still show the ad as the next track starts: an element is only
+  // taken to the end once the ad has lasted a moment on the same source, and
+  // if it is short like an ad. A track mistaken for one loses that moment.
+  const AD_CONFIRM_MS = 600;
+  const AD_MAX_SECONDS = 70;
+  const AD_RATE = 16; // As fast as browsers play: in case the page undoes the jump.
+  const mutedProp = Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype, 'muted');
+  const rateProp = Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype, 'playbackRate');
+  const silenced = new Map(); // Element -> what the page set, and since when it is held.
+  // Spotify's tab title during an ad, in a few languages ("Advertisement · …").
+  const AD_TITLE =
+    /^(?:Advertisement|Publicité|Werbung|Anuncio|Publicidad|Pubblicità|Anúncio|Publicidade|Advertentie)(?:\s|$)/;
+
+  let adBlock = true;
+  try {
+    adBlock = localStorage.getItem('spotiweb:adblock') !== 'off';
+  } catch (_) {}
+
+  // The bar flags ads. The tab title tells too, but a track could be called so:
+  // one that links to a track or an episode isn't an ad.
+  function adShown(bar) {
+    if (bar && bar.getAttribute('data-testadtype') === 'ad-type-ad') return true;
+    if (!AD_TITLE.test(document.title)) return false;
+    const title = bar && byTestId('context-item-info-title', bar);
+    const link = title && (title.closest('a') || title.querySelector('a'));
+    return !(link && /\/(?:track|episode)\//.test(link.getAttribute('href') || ''));
+  }
+
+  function hold(el) {
+    let held = silenced.get(el);
+    if (held) return held;
+    const page = { muted: mutedProp.get.call(el), rate: rateProp.get.call(el) };
+    held = { page, load: loads.get(el) || 0, since: Date.now() };
+    silenced.set(el, held);
+    Object.defineProperty(el, 'muted', {
+      configurable: true,
+      get: () => page.muted,
+      set: (value) => {
+        page.muted = !!value;
+      },
+    });
+    Object.defineProperty(el, 'playbackRate', {
+      configurable: true,
+      get: () => page.rate,
+      set: (value) => {
+        if (+value > 0) page.rate = +value;
+      },
+    });
+    mutedProp.set.call(el, true);
+    setTimeout(scheduleState, AD_CONFIRM_MS + 50);
+    return held;
+  }
+
+  const setRate = (el, rate) => {
+    try {
+      if (rateProp.get.call(el) !== rate) rateProp.set.call(el, rate);
+    } catch (_) {}
+  };
+
+  function release(el) {
+    const held = silenced.get(el);
+    if (!held) return;
+    silenced.delete(el);
+    delete el.muted;
+    delete el.playbackRate;
+    mutedProp.set.call(el, held.page.muted);
+    setRate(el, held.page.rate);
+  }
+
+  function cutShort(el, held) {
+    const load = loads.get(el) || 0;
+    if (held.load !== load) {
+      // Another source since: maybe the next track already. Look again later.
+      Object.assign(held, { load, since: Date.now() });
+      setRate(el, held.page.rate);
+      setTimeout(scheduleState, AD_CONFIRM_MS + 50);
+      return;
+    }
+    const end = el.duration;
+    if (Date.now() - held.since < AD_CONFIRM_MS || !(end <= AD_MAX_SECONDS)) return;
+    setRate(el, AD_RATE);
+    // Once: should the page take the jump back, the speed does the rest.
+    if (held.jumped !== load && el.currentTime < end - 0.5) {
+      held.jumped = load;
+      el.currentTime = end - 0.1;
+    }
+  }
+
+  function syncAds(bar) {
+    const ad = adBlock && adShown(bar);
+    for (const ref of players) {
+      const el = ref.deref();
+      if (!el) continue;
+      if (ad && (silenced.has(el) || audible(el))) {
+        const held = hold(el);
+        if (!el.paused) cutShort(el, held);
+      } else if (!ad) {
+        release(el);
+      }
+    }
   }
 
   // ------------------------------------------------------------------- clock
@@ -285,7 +407,8 @@
       artist: meta ? meta.artist || '' : '',
       album: meta ? meta.album || '' : '',
       artwork: meta ? largestArtwork(meta.artwork) : '',
-      isAd: !!bar && bar.getAttribute('data-testadtype') === 'ad-type-ad',
+      isAd: adShown(bar),
+      adBlock,
       playing,
       positionMs: clock.positionMs,
       positionAt: clock.positionAt,
@@ -330,7 +453,9 @@
 
   function pushState() {
     syncRouteClasses();
-    observeBar(nowPlayingBar());
+    const bar = nowPlayingBar();
+    observeBar(bar);
+    syncAds(bar);
     const state = readState();
     const json = JSON.stringify(state);
     if (json === lastSent) return;
@@ -481,6 +606,14 @@
       if (!runAction('seekto', { seekTime: target / 1000, fastSeek: false })) return false;
       // Known to the millisecond, unlike the elapsed time the bar will show.
       setClock(target, Date.now());
+      return true;
+    },
+    adBlock: (on) => {
+      adBlock = on !== false;
+      try {
+        localStorage.setItem('spotiweb:adblock', adBlock ? 'on' : 'off');
+      } catch (_) {}
+      syncAds(nowPlayingBar());
       return true;
     },
     shuffle: () => click(barControl('control-button-shuffle')),

@@ -9,6 +9,7 @@ import 'package:spotiweb/src/widgets.dart';
 void main() {
   late WebBridge bridge;
   late List<String> commands;
+  late List<Object?> arguments;
   late int verticalDrags;
 
   // Covers are left empty: network images can't load in tests.
@@ -17,11 +18,15 @@ void main() {
 
   Future<void> showPlayer(WidgetTester tester, PlayerState state) async {
     commands = [];
+    arguments = [];
     verticalDrags = 0;
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(const MethodChannel('spotiweb/player'), (
       call,
     ) async {
-      if (call.method == 'command') commands.add((call.arguments as Map)['name'] as String);
+      if (call.method == 'command') {
+        commands.add((call.arguments as Map)['name'] as String);
+        arguments.add((call.arguments as Map)['arg']);
+      }
       return true;
     });
     bridge = WebBridge()..state.value = state;
@@ -128,6 +133,27 @@ void main() {
     await tester.pumpAndSettle();
     expect(commands, isEmpty);
     expect(coverX(tester), moreOrLessEquals(home));
+  });
+
+  testWidgets('the options menu turns the ad blocker off and on', (tester) async {
+    await showPlayer(tester, const PlayerState(hasTrack: true, title: 'A', adBlock: true));
+    await tester.tap(find.byTooltip('Options'));
+    await tester.pumpAndSettle();
+    final item = find.widgetWithText(CheckedPopupMenuItem<void>, 'Bloquer les pubs');
+    expect(tester.widget<CheckedPopupMenuItem<void>>(item).checked, isTrue);
+    await tester.tap(item);
+    await tester.pumpAndSettle();
+    expect(commands, ['adBlock']);
+    expect(arguments, [false]);
+
+    bridge.state.value = const PlayerState(hasTrack: true, title: 'A');
+    await tester.pump();
+    await tester.tap(find.byTooltip('Options'));
+    await tester.pumpAndSettle();
+    expect(tester.widget<CheckedPopupMenuItem<void>>(item).checked, isFalse);
+    await tester.tap(item);
+    await tester.pumpAndSettle();
+    expect(arguments, [false, true]);
   });
 
   testWidgets('dragging the cover down still closes the player', (tester) async {

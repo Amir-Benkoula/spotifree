@@ -26,6 +26,14 @@ void main() {
     expect(state.isHomeRoute, isFalse);
   });
 
+  test('ads show as such, cut short when the blocker is on', () {
+    final ad = PlayerState.fromJson({'hasTrack': true, 'title': 'Annonceur', 'isAd': true, 'adBlock': true});
+    expect(ad.adBlock, isTrue);
+    expect(ad.displayTitle, 'Publicité passée');
+    expect(const PlayerState(title: 'Annonceur', isAd: true).displayTitle, 'Publicité');
+    expect(const PlayerState(title: 'Titre', adBlock: true).displayTitle, 'Titre');
+  });
+
   test('extrapolates the position while playing, clamped to the duration', () {
     const state = PlayerState(playing: true, positionMs: 10000, positionAt: 1000, durationMs: 20000);
     expect(state.positionNow(DateTime.fromMillisecondsSinceEpoch(6000)), const Duration(seconds: 15));

@@ -125,6 +125,34 @@ void main() {
     expect(commands, ['pause']);
   });
 
+  testWidgets('a blocked ad leaves the lock screen on the track before it', (tester) async {
+    await setUpHandler(tester);
+    bridge.state.value = const PlayerState(hasTrack: true, title: 'A', playing: true, adBlock: true);
+    await tester.pump();
+    expect(handler.mediaItem.value?.title, 'A');
+    bridge.state.value = const PlayerState(
+      hasTrack: true,
+      title: 'Annonceur',
+      isAd: true,
+      adBlock: true,
+      playing: true,
+      positionMs: 14000,
+      positionAt: 0,
+    );
+    await tester.pump();
+    expect(handler.mediaItem.value?.title, 'A');
+    bridge.state.value = const PlayerState(hasTrack: true, title: 'B', playing: true, adBlock: true);
+    await tester.pump();
+    expect(handler.mediaItem.value?.title, 'B');
+  });
+
+  testWidgets('with the blocker off, an ad shows as one', (tester) async {
+    await setUpHandler(tester);
+    bridge.state.value = const PlayerState(hasTrack: true, title: 'Annonceur', isAd: true, playing: true);
+    await tester.pump();
+    expect(handler.mediaItem.value?.title, 'Publicité');
+  });
+
   testWidgets('the media session outlives a short gap without a track', (tester) async {
     await setUpHandler(tester);
     bridge.state.value = playing;

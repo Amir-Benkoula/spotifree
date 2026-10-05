@@ -14,6 +14,7 @@ class PlayerState {
     this.album = '',
     this.artwork = '',
     this.isAd = false,
+    this.adBlock = false,
     this.playing = false,
     this.positionMs,
     this.positionAt,
@@ -47,6 +48,7 @@ class PlayerState {
       album: text('album'),
       artwork: text('artwork'),
       isAd: flag('isAd'),
+      adBlock: flag('adBlock'),
       playing: flag('playing'),
       positionMs: integer('positionMs'),
       positionAt: integer('positionAt'),
@@ -82,6 +84,9 @@ class PlayerState {
   final String artwork;
   final bool isAd;
 
+  /// Ads are cut short by the page (assets/inject/bootstrap.js).
+  final bool adBlock;
+
   final bool playing;
 
   /// Position at [positionAt] (epoch ms); the page only reports discontinuities.
@@ -106,6 +111,9 @@ class PlayerState {
   final bool library;
 
   Duration get duration => Duration(milliseconds: durationMs ?? 0);
+
+  /// The title to show: an ad gets a word instead of its own.
+  String get displayTitle => isAd ? (adBlock ? 'Publicité passée' : 'Publicité') : title;
 
   /// Current position, extrapolated from the last report while playing.
   Duration positionNow([DateTime? now]) {

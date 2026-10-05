@@ -54,7 +54,7 @@ class MiniPlayer extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            state.isAd ? 'Publicité' : state.title,
+                            state.displayTitle,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),

@@ -62,6 +62,7 @@ class WebBridge {
   Future<bool> toggleShuffle() => command('shuffle');
   Future<bool> cycleRepeat() => command('repeat');
   Future<bool> toggleLike() => command('like');
+  Future<bool> setAdBlock(bool on) => command('adBlock', on);
 
   Future<bool> goHome() => command('home');
   Future<bool> openSearch() => command('search');

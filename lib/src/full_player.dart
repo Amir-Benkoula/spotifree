@@ -44,7 +44,7 @@ class FullPlayer extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 24),
                 child: Column(
                   children: [
-                    _Header(album: state.album, onClose: onClose),
+                    _Header(album: state.album, adBlock: state.adBlock, onClose: onClose, onAdBlock: bridge.setAdBlock),
                     Expanded(
                       child: _SwipeArtwork(state: state, onNext: bridge.next, onPrevious: bridge.previousTrack),
                     ),
@@ -235,10 +235,12 @@ class _SwipeArtworkState extends State<_SwipeArtwork> with SingleTickerProviderS
 }
 
 class _Header extends StatelessWidget {
-  const _Header({required this.album, required this.onClose});
+  const _Header({required this.album, required this.adBlock, required this.onClose, required this.onAdBlock});
 
   final String album;
+  final bool adBlock;
   final VoidCallback onClose;
+  final ValueChanged<bool> onAdBlock;
 
   @override
   Widget build(BuildContext context) {
@@ -270,8 +272,18 @@ class _Header extends StatelessWidget {
               ],
             ),
           ),
-          // Balances the close button so the title stays centered.
-          const SizedBox(width: 48),
+          // Also balances the close button, so the title stays centered.
+          PopupMenuButton<void>(
+            tooltip: 'Options',
+            icon: const Icon(Icons.more_vert_rounded),
+            itemBuilder: (context) => [
+              CheckedPopupMenuItem(
+                checked: adBlock,
+                onTap: () => onAdBlock(!adBlock),
+                child: const Text('Bloquer les pubs'),
+              ),
+            ],
+          ),
         ],
       ),
     );
@@ -295,7 +307,7 @@ class _TitleRow extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                state.isAd ? 'Publicité' : state.title,
+                state.displayTitle,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700),

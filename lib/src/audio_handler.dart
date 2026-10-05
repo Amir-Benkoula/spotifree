@@ -51,13 +51,16 @@ class WebPlayerAudioHandler extends BaseAudioHandler with SeekHandler {
     _idleTimer?.cancel();
     _idleTimer = null;
 
+    // A blocked ad lasts a blink: the lock screen and the car stay on the track
+    // before it, rather than flash it.
+    final blockedAd = state.isAd && state.adBlock;
     final key = [state.title, state.artist, state.artwork, state.durationMs].join('\u0000');
-    if (key != _itemKey) {
+    if (!blockedAd && key != _itemKey) {
       _itemKey = key;
       mediaItem.add(
         MediaItem(
           id: key,
-          title: state.isAd ? 'Publicité' : state.title,
+          title: state.displayTitle,
           artist: state.artist,
           album: state.album,
           artUri: state.artwork.isEmpty ? null : Uri.tryParse(state.artwork),
@@ -66,6 +69,7 @@ class WebPlayerAudioHandler extends BaseAudioHandler with SeekHandler {
       );
     }
 
+    final current = playbackState.value;
     final next = PlaybackState(
       controls: [
         MediaControl.skipToPrevious,
@@ -76,11 +80,10 @@ class WebPlayerAudioHandler extends BaseAudioHandler with SeekHandler {
       androidCompactActionIndices: const [0, 1, 2],
       processingState: AudioProcessingState.ready,
       playing: state.playing,
-      updatePosition: state.positionNow(),
+      updatePosition: blockedAd ? current.position : state.positionNow(),
     );
     // Android extrapolates the position itself: only push discontinuities,
     // not every report, so the notification isn't rebuilt every second.
-    final current = playbackState.value;
     final drift = (current.position - next.updatePosition).inMilliseconds.abs();
     if (current.playing != next.playing ||
         current.processingState != next.processingState ||
