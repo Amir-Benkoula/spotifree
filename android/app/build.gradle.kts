@@ -31,6 +31,12 @@ android {
         versionName = flutter.versionName
     }
 
+    packaging {
+        // Native libraries compressed in the APK (GeckoView's libxul alone is
+        // 150 MB): half the download, for their extraction when installing.
+        jniLibs.useLegacyPackaging = true
+    }
+
     buildTypes {
         release {
             // TODO: Add your own signing config for the release build.
