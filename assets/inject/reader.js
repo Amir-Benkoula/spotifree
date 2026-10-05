@@ -1378,6 +1378,10 @@
       `URL : ${location.pathname}`,
       `Titre : ${document.title}`,
       `Écran : ${window.innerWidth}x${window.innerHeight}`,
+      `Navigateur : ${navigator.userAgent}`,
+      // What the player streams with: missing on some phones (iPhone).
+      `Lecture : MediaSource ${typeof window.MediaSource}, ManagedMediaSource ${typeof window.ManagedMediaSource}, ` +
+        `EME ${typeof navigator.requestMediaKeySystemAccess}`,
     ];
     const ids = new Map();
     for (const el of document.querySelectorAll('[data-testid]')) {

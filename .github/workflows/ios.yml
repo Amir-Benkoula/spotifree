@@ -1,0 +1,64 @@
+# Builds the iOS app on GitHub's macOS runners: checks that it compiles, and
+# publishes it unsigned as the "ios" pre-release, to sign and install on an
+# iPhone from a Mac (README, « Installer sur iPhone ») :
+#   https://github.com/Amir-Benkoula/spotifree/releases/download/ios/spotiweb-unsigned.ipa
+# Runs on every push to main or a claude/ branch, and on demand from the
+# Actions tab (iOS > Run workflow).
+name: iOS
+
+on:
+  push:
+    branches: [main, 'claude/**']
+  workflow_dispatch:
+
+# One build publishes at a time; the last one wins.
+concurrency:
+  group: ios
+  cancel-in-progress: false
+
+permissions:
+  contents: write # The release.
+
+jobs:
+  build:
+    runs-on: macos-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.47.4 # As in .metadata.
+          channel: stable
+          cache: true
+
+      - run: flutter pub get
+
+      # Signed on the Mac that installs it, with its owner's Apple ID.
+      - run: flutter build ios --release --no-codesign
+
+      - name: Package
+        run: |
+          mkdir -p Payload
+          cp -R build/ios/iphoneos/Runner.app Payload/
+          zip -qry spotiweb-unsigned.ipa Payload
+
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          sha=$(git rev-parse --short HEAD)
+          {
+            echo "Branche \`$GITHUB_REF_NAME\`, commit $sha (non signée : à installer depuis un Mac, voir le README)."
+            echo
+            git log -1 --format=%B
+          } > notes.md
+          gh release delete ios --cleanup-tag --yes || true
+          gh release create ios spotiweb-unsigned.ipa --prerelease --target "$GITHUB_SHA" \
+            --title "SpotiWeb iOS – $GITHUB_REF_NAME ($sha)" --notes-file notes.md
+          url="https://github.com/$GITHUB_REPOSITORY/releases/download/ios/spotiweb-unsigned.ipa"
+          echo "### [Télécharger l'IPA (non signée)]($url)" >> "$GITHUB_STEP_SUMMARY"

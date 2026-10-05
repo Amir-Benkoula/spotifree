@@ -305,6 +305,8 @@ class _ShellState extends State<Shell> with SingleTickerProviderStateMixin imple
         value: const SystemUiOverlayStyle(
           statusBarColor: Colors.transparent,
           statusBarIconBrightness: Brightness.light,
+          // iOS: light text on the dark app.
+          statusBarBrightness: Brightness.dark,
           systemNavigationBarColor: Colors.black,
           systemNavigationBarIconBrightness: Brightness.light,
         ),

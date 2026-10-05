@@ -14,6 +14,41 @@ première fois, désinstaller une version construite sur l'ordinateur. Pour que
 les deux se mettent à jour l'une l'autre, ajouter le secret `DEBUG_KEYSTORE`
 (le `~/.android/debug.keystore` de l'ordinateur, en base64) au dépôt.
 
+## Installer sur iPhone
+
+Apple ne laisse installer une app hors App Store qu'une fois signée avec un
+compte Apple, depuis un Mac. Avec un compte gratuit, l'app doit être signée à
+nouveau tous les 7 jours (sinon elle ne s'ouvre plus).
+
+Avant la première installation, sur l'iPhone : Réglages > Confidentialité et
+sécurité > Mode développeur (iOS 16 et plus), puis redémarrer.
+
+**Le plus simple, sans Xcode** : chaque push construit l'app sur GitHub
+(workflow `iOS`), non signée :
+<https://github.com/Amir-Benkoula/spotifree/releases/download/ios/spotiweb-unsigned.ipa>
+
+1. Installer [Sideloadly](https://sideloadly.io) sur le Mac et brancher l'iPhone.
+2. Glisser l'IPA dans Sideloadly, entrer son Apple ID, puis Start.
+3. Sur l'iPhone : Réglages > Général > VPN et gestion de l'appareil > faire
+   confiance à son Apple ID.
+
+**Depuis le code, avec Xcode** (et Flutter 3.47) :
+
+1. `flutter pub get`, puis ouvrir `ios/Runner.xcworkspace` dans Xcode.
+2. Cible Runner > Signing & Capabilities : choisir son équipe (son Apple ID) et
+   changer le Bundle Identifier (`com.amirbenkoula.spotiweb`) pour un nom à soi.
+3. Brancher l'iPhone, le choisir comme destination, puis Run (ou
+   `flutter run --release`).
+
+Sur iOS, les apps ne peuvent afficher le web qu'avec WebKit (Safari) : la page
+y tourne dans une WKWebView (`ios/Runner/WebPlayer.swift`), avec les mêmes
+scripts que sur Android. Que Spotify y joue la musique reste à vérifier :
+l'iPhone n'a pas l'API de streaming qu'utilise le lecteur web, seulement sa
+variante « gérée » (iOS 17.1 et plus), que l'app lui donne à la place ; l'iPad
+a la vraie. En cas de souci, « Copier le rapport de la page » (réglages) donne
+une ligne « Lecture », et Safari sur le Mac peut inspecter la page (menu
+Développement > l'iPhone > SpotiWeb).
+
 ## Interface
 
 L'app a ses propres écrans, comme l'app Spotify : accueil, recherche,

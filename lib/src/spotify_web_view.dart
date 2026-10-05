@@ -6,15 +6,17 @@ import 'package:flutter/services.dart';
 
 import 'web_bridge.dart';
 
-/// Must match GeckoPlayer.VIEW_TYPE.
+/// Must match GeckoPlayer.VIEW_TYPE (Android) and WebPlayer.viewType (iOS).
 const _viewType = 'spotiweb/gecko';
+const _iosViewType = 'spotiweb/webkit';
 
 /// Diagnostic switch: `--dart-define=SPOTIWEB_NO_INJECT=true` loads the bare
 /// desktop site, to tell our injected script/CSS apart from Spotify changes.
 const _injectionDisabled = bool.fromEnvironment('SPOTIWEB_NO_INJECT');
 
 /// open.spotify.com in GeckoView (Firefox's engine), see GeckoPlayer.kt. Android
-/// WebView isn't used: Spotify refuses to play in it.
+/// WebView isn't used: Spotify refuses to play in it. On iOS, where apps can
+/// only use WebKit, in a WKWebView (ios/Runner/WebPlayer.swift).
 class SpotifyWebView extends StatelessWidget {
   const SpotifyWebView({super.key, required this.bridge});
 
@@ -24,26 +26,7 @@ class SpotifyWebView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        PlatformViewLink(
-          viewType: _viewType,
-          // Hybrid composition: the native view scrolls and takes text input as is.
-          surfaceFactory: (context, controller) => AndroidViewSurface(
-            controller: controller as AndroidViewController,
-            hitTestBehavior: PlatformViewHitTestBehavior.opaque,
-            gestureRecognizers: {Factory<OneSequenceGestureRecognizer>(() => EagerGestureRecognizer())},
-          ),
-          onCreatePlatformView: (params) =>
-              PlatformViewsService.initExpensiveAndroidView(
-                  id: params.id,
-                  viewType: _viewType,
-                  layoutDirection: TextDirection.ltr,
-                  creationParams: const {'noInject': _injectionDisabled},
-                  creationParamsCodec: const StandardMessageCodec(),
-                  onFocus: () => params.onFocusChanged(true),
-                )
-                ..addOnPlatformViewCreatedListener(params.onPlatformViewCreated)
-                ..create(),
-        ),
+        if (defaultTargetPlatform == TargetPlatform.iOS) _webKitView() else _geckoView(),
         ValueListenableBuilder<String?>(
           valueListenable: bridge.loadError,
           builder: (context, error, _) => error == null
@@ -53,6 +36,39 @@ class SpotifyWebView extends StatelessWidget {
                 ),
         ),
       ],
+    );
+  }
+
+  Widget _geckoView() {
+    return PlatformViewLink(
+      viewType: _viewType,
+      // Hybrid composition: the native view scrolls and takes text input as is.
+      surfaceFactory: (context, controller) => AndroidViewSurface(
+        controller: controller as AndroidViewController,
+        hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+        gestureRecognizers: {Factory<OneSequenceGestureRecognizer>(() => EagerGestureRecognizer())},
+      ),
+      onCreatePlatformView: (params) =>
+          PlatformViewsService.initExpensiveAndroidView(
+              id: params.id,
+              viewType: _viewType,
+              layoutDirection: TextDirection.ltr,
+              creationParams: const {'noInject': _injectionDisabled},
+              creationParamsCodec: const StandardMessageCodec(),
+              onFocus: () => params.onFocusChanged(true),
+            )
+            ..addOnPlatformViewCreatedListener(params.onPlatformViewCreated)
+            ..create(),
+    );
+  }
+
+  Widget _webKitView() {
+    return UiKitView(
+      viewType: _iosViewType,
+      layoutDirection: TextDirection.ltr,
+      creationParams: const {'noInject': _injectionDisabled},
+      creationParamsCodec: const StandardMessageCodec(),
+      gestureRecognizers: {Factory<OneSequenceGestureRecognizer>(() => EagerGestureRecognizer())},
     );
   }
 }
