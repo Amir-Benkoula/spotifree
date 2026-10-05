@@ -11,7 +11,7 @@
   "content_scripts": [
     {
       "matches": ["https://open.spotify.com/*"],
-      "js": ["bootstrap.js"],
+      "js": ["bootstrap.js", "reader.js"],
       "run_at": "document_start",
       "world": "MAIN"
     },

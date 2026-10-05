@@ -7,6 +7,9 @@
 //    doesn't keep the playback state and position up to date there: they are
 //    worked out from the media it plays and from the (hidden) desktop player bar.
 // 2. Answers commands from the native UI (window.__spotiweb.cmd(name, arg)).
+//    Those whose argument carries an __id are requests: their result, maybe a
+//    promise, goes back as a { type: 'reply', id, result } message. reader.js,
+//    which runs next, adds the commands of the native screens.
 // 3. Adapts touch interactions (a tap on a track plays it, like the mobile app).
 // 4. Cuts ads short (Spotify Free), unless turned off.
 //
@@ -357,6 +360,12 @@
   }
 
   // -------------------------------------------------------------------- state
+  // The app shows this page itself (web interface) rather than its own screens.
+  let webUi = false;
+  try {
+    webUi = localStorage.getItem('spotiweb:ui') === 'web';
+  } catch (_) {}
+
   const nowPlayingBar = () => byTestId('now-playing-bar');
   const barControl = (id) => {
     const bar = nowPlayingBar();
@@ -383,6 +392,50 @@
     return best;
   };
 
+  // The link of a text in the bar (the element itself, inside or around it).
+  const linkOf = (el) => (el ? el.closest('a') || el.querySelector('a') : null);
+  const hrefOf = (link) => {
+    try {
+      return decodeURIComponent((link && link.getAttribute('href')) || '');
+    } catch (_) {
+      return '';
+    }
+  };
+
+  // The track playing, from its title's link in the bar: /track/<id>, or its
+  // album with the track in the query (…?highlight=spotify:track:<id>).
+  function trackUri(bar = nowPlayingBar()) {
+    const href = hrefOf(linkOf(bar && byTestId('context-item-info-title', bar)));
+    const match = /spotify:(track|episode):(\w+)/.exec(href) || /\/(track|episode)\/(\w+)/.exec(href);
+    return match ? `spotify:${match[1]}:${match[2]}` : '';
+  }
+
+  // Pages of the track playing: its album, artists and what it plays from.
+  function trackLinks(bar) {
+    const path = (href) => {
+      const match = /^(?:https:\/\/open\.spotify\.com)?(\/[a-z-]+\/\w+)/.exec(href);
+      return match ? match[1] : '';
+    };
+    const album = path(hrefOf(linkOf(bar && byTestId('context-item-info-title', bar))));
+    const artists = [];
+    if (bar) {
+      const links = bar.querySelectorAll('[data-testid="context-item-info-artist"], a[href*="/artist/"]');
+      for (const el of links) {
+        const link = linkOf(el) || el;
+        const artist = { name: (link.textContent || '').trim(), path: path(hrefOf(link)) };
+        if (artist.name && artist.path.startsWith('/artist/') && !artists.some((a) => a.path === artist.path)) {
+          artists.push(artist);
+        }
+      }
+    }
+    const context = path(hrefOf(bar && byTestId('context-link', bar)));
+    return {
+      albumPath: album.startsWith('/album/') ? album : '',
+      artists,
+      contextPath: /^\/(?:playlist|album|artist|show|collection)\//.test(context) ? context : '',
+    };
+  }
+
   function readState() {
     const now = Date.now();
     const meta = media.metadata;
@@ -396,17 +449,23 @@
     const elapsed = readElapsed(bar, now);
     const playing = playingNow(now);
     updateClock(meta, elapsed, playing, now);
+    const links = trackLinks(bar);
 
     return {
       appReady: !!document.getElementById('main-view'),
       loggedIn: byTestId('login-button') ? false : byTestId('user-widget-link') ? true : null,
       avatar: avatar ? avatar.src : '',
       path: location.pathname,
+      webUi,
       hasTrack: !!(meta && meta.title),
       title: meta ? meta.title || '' : '',
       artist: meta ? meta.artist || '' : '',
       album: meta ? meta.album || '' : '',
       artwork: meta ? largestArtwork(meta.artwork) : '',
+      trackUri: trackUri(bar),
+      albumPath: links.albumPath,
+      artists: links.artists,
+      contextPath: links.contextPath,
       isAd: adShown(bar),
       adBlock,
       playing,
@@ -433,6 +492,28 @@
 
   const post = (message) =>
     window.dispatchEvent(new CustomEvent('spotiweb:out', { detail: JSON.stringify(message) }));
+
+  // Copies (links to share…) go to the phone's clipboard through the app: the
+  // page's own attempt needs a user gesture, which commands from the app lack.
+  try {
+    const writeText = Clipboard.prototype.writeText;
+    Clipboard.prototype.writeText = function (data) {
+      post({ type: 'clipboard', text: String(data) });
+      return writeText.call(this, data).catch(() => {});
+    };
+  } catch (_) {}
+  const execCommand = Document.prototype.execCommand;
+  Document.prototype.execCommand = function (name, ...args) {
+    if (String(name).toLowerCase() === 'copy') {
+      const field = document.activeElement;
+      const data =
+        field && typeof field.value === 'string' && field.selectionEnd > field.selectionStart
+          ? field.value.slice(field.selectionStart, field.selectionEnd)
+          : String(document.getSelection() || '');
+      if (data) post({ type: 'clipboard', text: data });
+    }
+    return execCommand.call(this, name, ...args);
+  };
 
   // Changes in the player bar (elapsed time, buttons) are read as they happen.
   const barObserver = new MutationObserver(scheduleState);
@@ -488,13 +569,15 @@
 
   // Classes on <html> drive the mobile stylesheet.
   let lastPath = location.pathname;
+  // The app reads a panel (queue, lyrics) as it changes: it stays open.
+  let panelHeld = false;
   function syncRouteClasses() {
     const root = document.documentElement;
     if (location.pathname !== lastPath) {
       lastPath = location.pathname;
       // Opening something from the library or a panel brings that page to the front.
       root.classList.remove('sw-library');
-      if (root.classList.contains('sw-panel')) closePanel();
+      if (root.classList.contains('sw-panel') && !panelHeld) closePanel();
     }
     // Logged-out visitors get a locale prefix (/intl-fr/search).
     root.classList.toggle('sw-search', /^\/(?:intl-[\w-]+\/)?search(?:\/|$)/.test(location.pathname));
@@ -616,6 +699,13 @@
       syncAds(nowPlayingBar());
       return true;
     },
+    webUi: (on) => {
+      webUi = on === true;
+      try {
+        localStorage.setItem('spotiweb:ui', webUi ? 'web' : 'native');
+      } catch (_) {}
+      return true;
+    },
     shuffle: () => click(barControl('control-button-shuffle')),
     repeat: () => click(barControl('control-button-repeat')),
     like: () => click(barControl('add-button')),
@@ -658,13 +748,47 @@
   window.__spotiweb = {
     cmd(name, arg) {
       const command = commands[name];
-      const done = command ? !!command(arg) : false;
+      let result;
+      try {
+        result = command ? command(arg) : Promise.reject(new Error(`unknown command ${name}`));
+      } catch (error) {
+        result = Promise.reject(error);
+      }
+      // A request: its result goes back to the app once known.
+      const id = arg && typeof arg === 'object' ? arg.__id : undefined;
+      if (id !== undefined) {
+        Promise.resolve(result).then(
+          (value) => post({ type: 'reply', id, result: value === undefined ? null : value }),
+          (error) => post({ type: 'reply', id, error: String((error && error.message) || error) }),
+        );
+      } else if (result instanceof Promise) {
+        result.catch(() => {});
+      }
       // Let the page react, then report the new state right away.
       setTimeout(pushState, 150);
       setTimeout(pushState, 700);
-      return done;
+      return !!command && !!result;
     },
     state: readState,
+    // For reader.js.
+    internals: {
+      commands,
+      post,
+      byTestId,
+      navigate,
+      nowPlayingBar,
+      barControl,
+      setOverlay,
+      openPanel,
+      closePanel,
+      isPlaying,
+      trackUri,
+      until,
+      scheduleState,
+      holdPanel: (on) => {
+        panelHeld = !!on;
+      },
+    },
   };
   window.addEventListener('spotiweb:in', (event) => {
     if (typeof event.detail !== 'string') return;

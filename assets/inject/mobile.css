@@ -4,6 +4,7 @@
  * Hooks only on stable ids/data-testid (class names are hashed per build):
  *   grid      div:has(> #main-view)   areas: global-nav / left-sidebar main-view right-sidebar / now-playing-bar
  *   library   #Desktop_LeftSidebar_Id           shown full screen with html.sw-library
+ *                                               (laid out under the page with html.sw-read-library)
  *   panels    div:has(#Desktop_PanelContainer_Id) shown full screen with html.sw-panel (queue, lyrics…)
  *   player    [data-testid="now-playing-bar"]   kept rendered off-screen, replaced by the native player
  *   search    #global-nav-bar                   shown as a search bar on /search (html.sw-search)
@@ -120,8 +121,10 @@ div:has(+ #Desktop_LeftSidebar_Id),
 #Desktop_LeftSidebar_Id {
   display: none !important;
 }
-/* An absolutely positioned grid child is sized by its grid area: span them all. */
-html.sw-library #Desktop_LeftSidebar_Id {
+/* An absolutely positioned grid child is sized by its grid area: span them all.
+   sw-read-library: laid out the same, under the rest, for reader.js to read. */
+html.sw-library #Desktop_LeftSidebar_Id,
+html.sw-read-library #Desktop_LeftSidebar_Id {
   display: flex !important;
   grid-area: 1 / 1 / -1 / -1 !important;
   position: absolute !important;
@@ -130,6 +133,9 @@ html.sw-library #Desktop_LeftSidebar_Id {
   width: 100% !important;
   border-radius: 0 !important;
   background: #121212 !important;
+}
+html.sw-read-library:not(.sw-library) #Desktop_LeftSidebar_Id {
+  z-index: 0 !important;
 }
 
 /* ----------------------------------------------------------- side panels */
