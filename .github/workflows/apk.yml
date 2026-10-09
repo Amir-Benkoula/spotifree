@@ -26,7 +26,10 @@ jobs:
       # Android only installs an APK over one signed with the same key. Optional
       # repository secret: a debug keystore in base64 (such as the computer's
       # ~/.android/debug.keystore, so that its builds and these update each
-      # other). Without it, the key made by the first build is kept in the cache.
+      # other). Without it, the key made by the first build is kept in the cache;
+      # GitHub drops a cache unused for 7 days (and one branch doesn't see
+      # another's, except main's): the next build then makes a new key, and the
+      # app, seeing another key in version.json, explains how to install anew.
       DEBUG_KEYSTORE: ${{ secrets.DEBUG_KEYSTORE }}
     steps:
       - uses: actions/checkout@v5
@@ -62,7 +65,9 @@ jobs:
               -keyalg RSA -keysize 2048 -validity 10000
           fi
           # Public: tells whether two builds can update each other.
-          keytool -list -v -keystore ~/.android/debug.keystore -storepass android | grep -m1 'SHA256:'
+          signer=$(keytool -list -v -keystore ~/.android/debug.keystore -storepass android | grep -m1 'SHA256:' | sed 's/.*SHA256: *//')
+          echo "Clé de signature : $signer"
+          echo "SIGNER=$signer" >> "$GITHUB_ENV"
 
       - run: flutter pub get
       - run: flutter analyze
@@ -78,7 +83,8 @@ jobs:
             --build-name=1.0.$GITHUB_RUN_NUMBER --build-number=$GITHUB_RUN_NUMBER \
             --dart-define=SPOTIWEB_BUILD=$GITHUB_RUN_NUMBER \
             --dart-define=SPOTIWEB_COMMIT=${GITHUB_SHA::7} \
-            --dart-define=SPOTIWEB_REPO=$GITHUB_REPOSITORY
+            --dart-define=SPOTIWEB_REPO=$GITHUB_REPOSITORY \
+            --dart-define=SPOTIWEB_SIGNER=$SIGNER
 
       - name: Publish
         env:
@@ -88,7 +94,7 @@ jobs:
           sha=$(git rev-parse --short HEAD)
           # What the app compares itself with.
           jq -n --argjson build "$GITHUB_RUN_NUMBER" --arg commit "$sha" --arg notes "$(git log -1 --format=%s)" \
-            '{build: $build, commit: $commit, notes: $notes}' > version.json
+            --arg signer "$SIGNER" '{build: $build, commit: $commit, notes: $notes, signer: $signer}' > version.json
           {
             echo "Branche \`$GITHUB_REF_NAME\`, commit $sha :"
             echo

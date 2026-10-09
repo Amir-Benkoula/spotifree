@@ -13,6 +13,10 @@ import 'system_channel.dart';
 const appBuild = int.fromEnvironment('SPOTIWEB_BUILD');
 const appCommit = String.fromEnvironment('SPOTIWEB_COMMIT');
 
+/// The fingerprint (SHA-256) of the key this build is signed with: Android only
+/// installs an update signed with the same one. Empty when unknown.
+const appSigner = String.fromEnvironment('SPOTIWEB_SIGNER');
+
 /// Where the builds are published.
 const appRepository = String.fromEnvironment('SPOTIWEB_REPO', defaultValue: 'Amir-Benkoula/spotifree');
 
@@ -25,12 +29,13 @@ String get appVersionLabel =>
 /// A published build, as its version.json describes it.
 @immutable
 class Release {
-  const Release({required this.build, this.commit = '', this.notes = ''});
+  const Release({required this.build, this.commit = '', this.notes = '', this.signer = ''});
 
   factory Release.fromJson(Map<String, dynamic> json) => Release(
     build: (json['build'] as num).toInt(),
     commit: json['commit'] as String? ?? '',
     notes: json['notes'] as String? ?? '',
+    signer: json['signer'] as String? ?? '',
   );
 
   final int build;
@@ -38,6 +43,9 @@ class Release {
 
   /// What changed (the build's commit title).
   final String notes;
+
+  /// The fingerprint of the key the build is signed with (see [appSigner]).
+  final String signer;
 
   String get name => versionName(build);
 }
@@ -92,6 +100,7 @@ class Updater {
   Updater({
     this.build = appBuild,
     this.repository = appRepository,
+    this.signer = appSigner,
     bool? ios,
     Future<Object?> Function(Uri url)? fetchJson,
     Future<String> Function(Uri url, Release release, void Function(double? progress) onProgress)? download,
@@ -106,6 +115,9 @@ class Updater {
   /// This build's number; 0: no updates.
   final int build;
   final String repository;
+
+  /// The fingerprint of the key this build is signed with (see [appSigner]).
+  final String signer;
   final bool ios;
   final Future<Object?> Function(Uri url) _fetchJson;
   final Future<String> Function(Uri url, Release release, void Function(double? progress) onProgress) _download;
@@ -176,6 +188,11 @@ class Updater {
       await _openUrl(iosPage.toString());
       return;
     }
+    // The system installer would refuse it.
+    if (!installsOver(release)) {
+      await openDownload();
+      return;
+    }
     state.value = UpdateDownloading(release, null);
     try {
       final path = await _download(apkUrl, release, (progress) => state.value = UpdateDownloading(release, progress));
@@ -188,6 +205,17 @@ class Updater {
   }
 
   void dismiss(Release release) => dismissed.value = release.build;
+
+  /// Whether Android installs [release] over this build: not when it is signed
+  /// with another key (GitHub lost the builds' key and made a new one, see
+  /// .github/workflows/apk.yml). Then the app has to be installed anew.
+  bool installsOver(Release release) {
+    String hex(String fingerprint) => fingerprint.replaceAll(RegExp('[^0-9A-Fa-f]'), '').toUpperCase();
+    return ios || hex(signer).isEmpty || hex(release.signer).isEmpty || hex(release.signer) == hex(signer);
+  }
+
+  /// The latest APK, downloaded by the browser (to install anew).
+  Future<void> openDownload() => _openUrl(apkUrl.toString());
 
   static Future<Object?> _getJson(Uri url) async {
     final client = HttpClient()..connectionTimeout = const Duration(seconds: 15);

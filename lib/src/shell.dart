@@ -14,6 +14,7 @@ import 'mini_player.dart';
 import 'page_screen.dart';
 import 'player_state.dart';
 import 'queue_screen.dart';
+import 'reinstall_dialog.dart';
 import 'search_screen.dart';
 import 'settings_sheet.dart';
 import 'spotify_web_view.dart';
@@ -513,10 +514,12 @@ class _UpdateBanner extends StatelessWidget {
           return const SizedBox.shrink();
         }
         final textTheme = Theme.of(context).textTheme;
+        final reinstall = !updater.installsOver(release);
         final (title, subtitle) = switch (state) {
           UpdateDownloading() => ('Téléchargement de la version ${release.name}…', ''),
           UpdateFailed(:final message) => ('Mise à jour ${release.name}', message),
           _ when updater.ios => ('Version ${release.name} disponible', 'À installer depuis ton Mac'),
+          _ when reinstall => ('Nouvelle version ${release.name}', 'À réinstaller : signée avec une autre clé'),
           _ => ('Nouvelle version ${release.name}', release.notes),
         };
         return Container(
@@ -547,9 +550,11 @@ class _UpdateBanner extends StatelessWidget {
                   ),
                   if (state is! UpdateDownloading) ...[
                     TextButton(
-                      onPressed: updater.install,
+                      onPressed: reinstall ? () => showReinstallHelp(context, updater, release) : updater.install,
                       child: Text(
-                        state is UpdateFailed
+                        reinstall
+                            ? 'Comment ?'
+                            : state is UpdateFailed
                             ? 'Réessayer'
                             : updater.ios
                             ? 'Voir'

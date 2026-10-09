@@ -7,13 +7,14 @@ void main() {
   late List<String> opened;
   late Object? Function() published;
 
-  Updater updater({int build = 5, bool ios = false, bool downloadFails = false}) {
+  Updater updater({int build = 5, String signer = '', bool ios = false, bool downloadFails = false}) {
     fetched = [];
     installed = [];
     opened = [];
     return Updater(
       build: build,
       repository: 'owner/repo',
+      signer: signer,
       ios: ios,
       fetchJson: (url) async {
         fetched.add(url);
@@ -94,6 +95,30 @@ void main() {
     expect(fetched.single.path, endsWith('/download/ios/version.json'));
     await ios.install();
     expect(opened, ['https://github.com/owner/repo/releases/tag/ios']);
+  });
+
+  test('a build signed with another key is to install anew', () async {
+    const key = '27:AB:58:6D';
+    published = () => {'build': 7, 'signer': '27:AB:58:6D'};
+    final same = updater(signer: key);
+    await same.check();
+    final release = (same.state.value as UpdateAvailable).release;
+    expect(release.signer, key);
+    expect(same.installsOver(release), isTrue);
+    expect(same.installsOver(const Release(build: 7, signer: '27ab586d')), isTrue);
+    // Unknown on either side: as before.
+    expect(updater().installsOver(release), isTrue);
+    expect(same.installsOver(const Release(build: 7)), isTrue);
+
+    final other = updater(signer: 'C4:01:9E:12');
+    await other.check();
+    expect(other.installsOver(release), isFalse);
+    expect(updater(signer: 'C4:01:9E:12', ios: true).installsOver(release), isTrue);
+    // The system installer would refuse it: the browser downloads it instead.
+    await other.install();
+    expect(installed, isEmpty);
+    expect(opened, ['https://github.com/owner/repo/releases/download/apk/spotiweb.apk']);
+    expect(other.state.value, isA<UpdateAvailable>());
   });
 
   test('a build put off is remembered', () async {

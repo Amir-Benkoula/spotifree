@@ -113,6 +113,59 @@ void main() {
     expect(find.text('Nouvelle version 1.0.7'), findsNothing);
   });
 
+  testWidgets('a newer build signed with another key: how to install it anew', (tester) async {
+    final installed = <String>[];
+    final opened = <String>[];
+    final updater = Updater(
+      build: 5,
+      signer: '27:AB:58:6D',
+      ios: false,
+      fetchJson: (_) async => {'build': 7, 'signer': 'C4:01:9E:12'},
+      download: (url, release, onProgress) async => '/cache/spotiweb-${release.build}.apk',
+      installApk: (path) async => installed.add(path),
+      openUrl: (url) async => opened.add(url),
+    );
+    addTearDown(updater.dispose);
+    page = FakePage(tester);
+    page.answers['read'] = (arg) => complete('home');
+    bridge = WebBridge();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Shell(bridge: bridge, webView: webView, updater: updater),
+      ),
+    );
+    await page.state({});
+    await page.settle();
+
+    await updater.check();
+    await tester.pump();
+    expect(find.text('Nouvelle version 1.0.7'), findsOneWidget);
+    expect(find.text('À réinstaller : signée avec une autre clé'), findsOneWidget);
+    expect(find.text('Installer'), findsNothing);
+    await tester.tap(find.text('Comment ?'));
+    await tester.pumpAndSettle();
+    expect(find.text('Version 1.0.7 : à réinstaller'), findsOneWidget);
+    await tester.tap(find.text('Télécharger'));
+    await tester.pumpAndSettle();
+    expect(find.text('Version 1.0.7 : à réinstaller'), findsNothing);
+    expect(opened, ['https://github.com/Amir-Benkoula/spotifree/releases/download/apk/spotiweb.apk']);
+    expect(installed, isEmpty);
+
+    // The same from the settings.
+    await tester.tap(find.byTooltip('Réglages').first);
+    await tester.pumpAndSettle();
+    final tile = find.text('Version 1.0.7 disponible, à réinstaller : toucher pour savoir comment');
+    await tester.ensureVisible(tile);
+    await tester.pumpAndSettle();
+    await tester.tap(tile);
+    await tester.pumpAndSettle();
+    expect(find.text('Version 1.0.7 : à réinstaller'), findsOneWidget);
+    await tester.tap(find.text('Plus tard').last);
+    await tester.pumpAndSettle();
+    expect(find.text('Version 1.0.7 : à réinstaller'), findsNothing);
+    expect(installed, isEmpty);
+  });
+
   testWidgets('the web interface, when chosen: the page with the bottom bar', (tester) async {
     await start(tester, {'webUi': true});
     expect(find.text('Section 0'), findsNothing);

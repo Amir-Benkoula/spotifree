@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import 'app_actions.dart';
 import 'player_state.dart';
+import 'reinstall_dialog.dart';
 import 'updater.dart';
 import 'web_bridge.dart';
 
@@ -94,10 +95,14 @@ class _VersionTile extends StatelessWidget {
 
   final AppActions app;
 
-  Future<void> _onTap() async {
+  Future<void> _onTap(BuildContext context) async {
     final updater = app.updater;
-    if (updater.state.value is UpdateAvailable) {
-      await updater.install();
+    if (updater.state.value case UpdateAvailable(:final release)) {
+      if (updater.installsOver(release)) {
+        await updater.install();
+      } else {
+        await showReinstallHelp(context, updater, release);
+      }
       return;
     }
     await updater.check(manual: true);
@@ -124,12 +129,16 @@ class _VersionTile extends StatelessWidget {
           _ when !updater.enabled => 'Construite hors de GitHub : pas de mises à jour',
           UpdateChecking() => 'Recherche de mises à jour…',
           UpToDate() => 'À jour',
+          UpdateAvailable(:final release) when !updater.installsOver(release) =>
+            'Version ${release.name} disponible, à réinstaller : toucher pour savoir comment',
           UpdateAvailable(:final release) => 'Version ${release.name} disponible : toucher pour installer',
           UpdateDownloading(:final release) => 'Téléchargement de la version ${release.name}…',
           UpdateFailed(:final message) => message,
           UpdateIdle() => 'Toucher pour chercher une mise à jour',
         }),
-        onTap: updater.enabled && state is! UpdateChecking && state is! UpdateDownloading ? _onTap : null,
+        onTap: updater.enabled && state is! UpdateChecking && state is! UpdateDownloading
+            ? () => _onTap(context)
+            : null,
       ),
     );
   }

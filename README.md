@@ -14,10 +14,14 @@ version, la télécharge et ouvre l'installation d'Android (la première fois,
 Android demande d'autoriser SpotiWeb à installer des applis). Réglages (photo de
 profil) > Version, pour vérifier tout de suite.
 
-Android n'installe une mise à jour que si elle est signée avec la même clé : la
-première fois, désinstaller une version construite sur l'ordinateur. Pour que
-les deux se mettent à jour l'une l'autre, ajouter le secret `DEBUG_KEYSTORE`
-(le `~/.android/debug.keystore` de l'ordinateur, en base64) au dépôt.
+Android n'installe une mise à jour que si elle est signée avec la même clé.
+GitHub garde celle des builds tant qu'il y en a au moins un par semaine ; sinon,
+le build suivant en a une nouvelle, et l'app explique comment le réinstaller
+(désinstaller SpotiWeb, installer le nouvel APK, se reconnecter à Spotify). Pour
+une clé définitive, ajouter au dépôt le secret `DEBUG_KEYSTORE` : un keystore de
+debug en base64, comme le `~/.android/debug.keystore` d'un ordinateur, dont les
+builds et ceux de GitHub se mettent alors à jour les uns les autres (une
+dernière réinstallation, au changement de clé).
 
 ## Installer sur iPhone
 
