@@ -1373,7 +1373,9 @@
         .join(' '),
     );
 
-  function report() {
+  // [lines]: about how many lines of outline (a shorter report, for the diagnostic).
+  function report(lines = 1200) {
+    const scale = Math.max(0.05, lines / 1200);
     const out = [
       `URL : ${location.pathname}`,
       `Titre : ${document.title}`,
@@ -1401,9 +1403,9 @@
       ['menus', openMenus()[0], 80],
     ]) {
       out.push('', `# ${name}`);
-      const lines = [];
-      outline(el, 0, lines, budget);
-      out.push(...lines);
+      const part = [];
+      outline(el, 0, part, Math.round(budget * scale));
+      out.push(...part);
     }
     out.push('', '# lecture', JSON.stringify(snapshot(here())).slice(0, 8000));
     return out.join('\n');
@@ -1445,7 +1447,7 @@
     watchLyrics: (arg) => (arg && arg.live === false ? stopLyrics() : exclusive(arg || {}, lyrics)),
     lyricsSeek,
     showWeb: request(showWeb),
-    report: () => report(),
+    report: (arg) => report(arg && arg.lines),
     cancel: (arg) => {
       const job = jobs.get(arg && arg.id);
       if (job) job.cancelled = true;

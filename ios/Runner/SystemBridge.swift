@@ -1,5 +1,6 @@
 import AVFoundation
 import Flutter
+import UIKit
 
 /// The "spotiweb/system" channel (SystemChannel in Dart), as MainActivity.kt
 /// answers it on Android.
@@ -14,6 +15,11 @@ final class SystemBridge: NSObject {
       case "moveTaskToBack":
         // An iOS app can't send itself to the background.
         result(false)
+      case "openUrl":
+        if let link = call.arguments as? String, let url = URL(string: link) {
+          UIApplication.shared.open(url)
+        }
+        result(nil)
       default:
         result(FlutterMethodNotImplemented)
       }

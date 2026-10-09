@@ -9,6 +9,11 @@ Chaque push sur `main` ou une branche `claude/…` construit l'APK sur GitHub
 ici, à ouvrir depuis le téléphone :
 <https://github.com/Amir-Benkoula/spotifree/releases/download/apk/spotiweb.apk>
 
+Ensuite, l'app se met à jour elle-même : une bannière propose chaque nouvelle
+version, la télécharge et ouvre l'installation d'Android (la première fois,
+Android demande d'autoriser SpotiWeb à installer des applis). Réglages (photo de
+profil) > Version, pour vérifier tout de suite.
+
 Android n'installe une mise à jour que si elle est signée avec la même clé : la
 première fois, désinstaller une version construite sur l'ordinateur. Pour que
 les deux se mettent à jour l'une l'autre, ajouter le secret `DEBUG_KEYSTORE`
@@ -58,9 +63,10 @@ qui tourne caché derrière : l'app le lit et clique dedans
 (`assets/inject/reader.js`), sans passer par l'API de Spotify.
 
 Si un écran s'affiche mal (Spotify change son site de temps en temps), la photo
-de profil ouvre les réglages : « Voir la page web » montre le site, et « Copier
-le rapport de la page » copie de quoi corriger la lecture. Le site tel quel, à
-la place des écrans de l'app, reste disponible : réglages > « Interface web ».
+de profil ouvre les réglages : « Diagnostic » essaie chaque fonction de l'app
+sur la vraie page et dit ce qui marche, avec un rapport à copier pour corriger
+le reste ; « Voir la page web » montre le site. Le site tel quel, à la place des
+écrans de l'app, reste disponible : réglages > « Interface web ».
 
 ## Getting Started
 

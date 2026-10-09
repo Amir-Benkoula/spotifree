@@ -38,8 +38,15 @@ jobs:
 
       - run: flutter pub get
 
-      # Signed on the Mac that installs it, with its owner's Apple ID.
-      - run: flutter build ios --release --no-codesign
+      # Signed on the Mac that installs it, with its owner's Apple ID. Numbered
+      # like the APK, from this workflow's runs (lib/src/updater.dart).
+      - name: Build
+        run: |
+          flutter build ios --release --no-codesign \
+            --build-name=1.0.$GITHUB_RUN_NUMBER --build-number=$GITHUB_RUN_NUMBER \
+            --dart-define=SPOTIWEB_BUILD=$GITHUB_RUN_NUMBER \
+            --dart-define=SPOTIWEB_COMMIT=${GITHUB_SHA::7} \
+            --dart-define=SPOTIWEB_REPO=$GITHUB_REPOSITORY
 
       - name: Package
         run: |
@@ -52,13 +59,15 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           sha=$(git rev-parse --short HEAD)
+          jq -n --argjson build "$GITHUB_RUN_NUMBER" --arg commit "$sha" --arg notes "$(git log -1 --format=%s)" \
+            '{build: $build, commit: $commit, notes: $notes}' > version.json
           {
             echo "Branche \`$GITHUB_REF_NAME\`, commit $sha (non signée : à installer depuis un Mac, voir le README)."
             echo
             git log -1 --format=%B
           } > notes.md
           gh release delete ios --cleanup-tag --yes || true
-          gh release create ios spotiweb-unsigned.ipa --prerelease --target "$GITHUB_SHA" \
-            --title "SpotiWeb iOS – $GITHUB_REF_NAME ($sha)" --notes-file notes.md
+          gh release create ios spotiweb-unsigned.ipa version.json --prerelease --target "$GITHUB_SHA" \
+            --title "SpotiWeb iOS 1.0.$GITHUB_RUN_NUMBER – $GITHUB_REF_NAME ($sha)" --notes-file notes.md
           url="https://github.com/$GITHUB_REPOSITORY/releases/download/ios/spotiweb-unsigned.ipa"
           echo "### [Télécharger l'IPA (non signée)]($url)" >> "$GITHUB_STEP_SUMMARY"

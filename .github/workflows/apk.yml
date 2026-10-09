@@ -68,8 +68,17 @@ jobs:
       - run: flutter analyze
       - run: flutter test
 
-      # GeckoView is only bundled for arm64 (android/app/build.gradle.kts).
-      - run: flutter build apk --release --target-platform android-arm64
+      # GeckoView is only bundled for arm64 (android/app/build.gradle.kts). The
+      # build number (versionCode) grows with each run, so that each APK updates
+      # the previous one; the app knows it too, to look for newer ones
+      # (lib/src/updater.dart, version.json below).
+      - name: Build
+        run: |
+          flutter build apk --release --target-platform android-arm64 \
+            --build-name=1.0.$GITHUB_RUN_NUMBER --build-number=$GITHUB_RUN_NUMBER \
+            --dart-define=SPOTIWEB_BUILD=$GITHUB_RUN_NUMBER \
+            --dart-define=SPOTIWEB_COMMIT=${GITHUB_SHA::7} \
+            --dart-define=SPOTIWEB_REPO=$GITHUB_REPOSITORY
 
       - name: Publish
         env:
@@ -77,13 +86,16 @@ jobs:
         run: |
           cp build/app/outputs/flutter-apk/app-release.apk spotiweb.apk
           sha=$(git rev-parse --short HEAD)
+          # What the app compares itself with.
+          jq -n --argjson build "$GITHUB_RUN_NUMBER" --arg commit "$sha" --arg notes "$(git log -1 --format=%s)" \
+            '{build: $build, commit: $commit, notes: $notes}' > version.json
           {
             echo "Branche \`$GITHUB_REF_NAME\`, commit $sha :"
             echo
             git log -1 --format=%B
           } > notes.md
           gh release delete apk --cleanup-tag --yes || true
-          gh release create apk spotiweb.apk --prerelease --target "$GITHUB_SHA" \
-            --title "SpotiWeb – $GITHUB_REF_NAME ($sha)" --notes-file notes.md
+          gh release create apk spotiweb.apk version.json --prerelease --target "$GITHUB_SHA" \
+            --title "SpotiWeb 1.0.$GITHUB_RUN_NUMBER – $GITHUB_REF_NAME ($sha)" --notes-file notes.md
           url="https://github.com/$GITHUB_REPOSITORY/releases/download/apk/spotiweb.apk"
           echo "### [Télécharger l'APK]($url)" >> "$GITHUB_STEP_SUMMARY"

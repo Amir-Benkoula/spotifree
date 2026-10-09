@@ -84,8 +84,9 @@ class WebContent {
   Future<void> showWeb({String? path, String? view}) =>
       _ask('showWeb', {'path': ?path, 'view': ?view}, _ignore).result.catchError((_) {});
 
-  /// An outline of the page, to find out what changed when it can't be read.
-  Future<String> report() => _ask('report', const {}, (json) => '$json').result;
+  /// An outline of the page, to find out what changed when it can't be read;
+  /// about [lines] long.
+  Future<String> report({int? lines}) => _ask('report', {'lines': ?lines}, (json) => '$json').result;
 
   static void _ignore(Object? _) {}
 

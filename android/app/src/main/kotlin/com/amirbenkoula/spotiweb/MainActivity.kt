@@ -5,10 +5,13 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.media.AudioManager
+import android.net.Uri
 import android.os.Build
+import androidx.core.content.FileProvider
 import com.ryanheise.audioservice.AudioServiceActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
+import java.io.File
 
 // AudioServiceActivity shares its FlutterEngine with the playback service.
 class MainActivity : AudioServiceActivity() {
@@ -41,6 +44,32 @@ class MainActivity : AudioServiceActivity() {
                 setMethodCallHandler { call, result ->
                     when (call.method) {
                         "moveTaskToBack" -> result.success(moveTaskToBack(true))
+                        // Updates (lib/src/updater.dart): downloaded in the cache, then
+                        // handed to the system installer, which asks to confirm.
+                        "updatesDir" -> result.success(File(cacheDir, "updates").apply { mkdirs() }.absolutePath)
+                        "installApk" ->
+                            try {
+                                val apk = File(call.arguments as String)
+                                val uri = FileProvider.getUriForFile(this@MainActivity, "$packageName.updates", apk)
+                                startActivity(
+                                    Intent(Intent.ACTION_VIEW)
+                                        .setDataAndType(uri, "application/vnd.android.package-archive")
+                                        .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK),
+                                )
+                                result.success(null)
+                            } catch (e: Exception) {
+                                result.error("install", e.message, null)
+                            }
+                        "openUrl" ->
+                            try {
+                                startActivity(
+                                    Intent(Intent.ACTION_VIEW, Uri.parse(call.arguments as String))
+                                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+                                )
+                                result.success(null)
+                            } catch (e: Exception) {
+                                result.error("open", e.message, null)
+                            }
                         else -> result.notImplemented()
                     }
                 }

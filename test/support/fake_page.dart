@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:spotiweb/src/app_actions.dart';
+import 'package:spotiweb/src/updater.dart';
 import 'package:spotiweb/src/web_bridge.dart';
 import 'package:spotiweb/src/web_content.dart';
 import 'package:spotiweb/src/web_data.dart';
@@ -108,6 +109,9 @@ class TestApp implements AppActions {
   @override
   final WebContent content;
 
+  @override
+  final Updater updater = Updater(build: 0);
+
   final opened = <String>[];
   final webs = <({String? path, String? view})>[];
   final menus = <(MenuTarget, String?)>[];
@@ -115,6 +119,7 @@ class TestApp implements AppActions {
   var queues = 0;
   var lyrics = 0;
   var settings = 0;
+  var diagnostics = 0;
 
   @override
   void openPath(String path, {WebCard? preview}) => opened.add(path);
@@ -130,6 +135,9 @@ class TestApp implements AppActions {
 
   @override
   void openSettings() => settings++;
+
+  @override
+  void openDiagnostic() => diagnostics++;
 
   @override
   Future<void> showMenu(MenuTarget target, {String? path, MenuHeader? header}) async => menus.add((target, path));

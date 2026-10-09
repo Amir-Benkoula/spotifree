@@ -1,3 +1,4 @@
+import 'updater.dart';
 import 'web_bridge.dart';
 import 'web_content.dart';
 import 'web_data.dart';
@@ -6,6 +7,7 @@ import 'web_data.dart';
 abstract interface class AppActions {
   WebBridge get bridge;
   WebContent get content;
+  Updater get updater;
 
   /// Shows a page of the web player on its own screen, over the current tab.
   /// [preview] is what the link showed, to show while the page loads.
@@ -18,6 +20,9 @@ abstract interface class AppActions {
   void openQueue();
   void openLyrics();
   void openSettings();
+
+  /// Tries each function of the app on the real page (diagnostic_screen.dart).
+  void openDiagnostic();
 
   /// The page's context menu for [target] (on the page at [path]), as a sheet.
   Future<void> showMenu(MenuTarget target, {String? path, MenuHeader? header});

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'app_actions.dart';
+import 'diagnostic_screen.dart';
 import 'full_player.dart';
 import 'home_screen.dart';
 import 'library_screen.dart';
@@ -17,6 +18,7 @@ import 'search_screen.dart';
 import 'settings_sheet.dart';
 import 'spotify_web_view.dart';
 import 'system_channel.dart';
+import 'updater.dart';
 import 'web_bridge.dart';
 import 'web_content.dart';
 import 'web_data.dart';
@@ -33,12 +35,15 @@ enum _Tab { home, search, library }
 /// for, and as the whole interface when chosen in the settings (with the
 /// bottom navigation and players around it, as the app first was).
 class Shell extends StatefulWidget {
-  const Shell({super.key, required this.bridge, @visibleForTesting this.webView});
+  const Shell({super.key, required this.bridge, @visibleForTesting this.webView, @visibleForTesting this.updater});
 
   final WebBridge bridge;
 
   /// In place of the web view (tests, which have none).
   final Widget? webView;
+
+  /// In place of the app's own (tests).
+  final Updater? updater;
 
   @override
   State<Shell> createState() => _ShellState();
@@ -55,6 +60,9 @@ class _ShellState extends State<Shell> with SingleTickerProviderStateMixin imple
 
   @override
   late final WebContent content = WebContent(widget.bridge);
+
+  @override
+  late final Updater updater = widget.updater ?? (Updater()..schedule());
 
   /// False on the login pages (accounts.spotify.com…), which get the whole screen.
   bool _onPlayer = true;
@@ -92,6 +100,7 @@ class _ShellState extends State<Shell> with SingleTickerProviderStateMixin imple
     bridge.location.removeListener(_onLocationChanged);
     _notices?.cancel();
     _splashTimer.cancel();
+    if (widget.updater == null) updater.dispose();
     _libraryShown.dispose();
     _player.dispose();
     super.dispose();
@@ -185,6 +194,9 @@ class _ShellState extends State<Shell> with SingleTickerProviderStateMixin imple
 
   @override
   void openSettings() => showSettings(context, this);
+
+  @override
+  void openDiagnostic() => Navigator.of(context).push(_slideUp((_) => DiagnosticScreen(app: this)));
 
   @override
   Future<void> showMenu(MenuTarget target, {String? path, MenuHeader? header}) =>
@@ -368,6 +380,7 @@ class _ShellState extends State<Shell> with SingleTickerProviderStateMixin imple
                           onDragEnd: _endDragPlayer,
                         ),
                       if (chrome && state.loggedIn == false) _LoginBanner(onLogin: bridge.login),
+                      if (chrome) _UpdateBanner(updater: updater),
                       if (chrome)
                         _BottomNav(
                           selected: native ? _tab : _selectedWebTab(state),
@@ -474,6 +487,92 @@ class _BottomNav extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// A newer build to install: download progress, then the system installer.
+class _UpdateBanner extends StatelessWidget {
+  const _UpdateBanner({required this.updater});
+
+  final Updater updater;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListenableBuilder(
+      listenable: Listenable.merge([updater.state, updater.dismissed]),
+      builder: (context, _) {
+        final state = updater.state.value;
+        final release = switch (state) {
+          UpdateAvailable(:final release) => release,
+          UpdateDownloading(:final release) => release,
+          UpdateFailed(:final release?) => release,
+          _ => null,
+        };
+        if (release == null || (updater.dismissed.value == release.build && state is! UpdateDownloading)) {
+          return const SizedBox.shrink();
+        }
+        final textTheme = Theme.of(context).textTheme;
+        final (title, subtitle) = switch (state) {
+          UpdateDownloading() => ('Téléchargement de la version ${release.name}…', ''),
+          UpdateFailed(:final message) => ('Mise à jour ${release.name}', message),
+          _ when updater.ios => ('Version ${release.name} disponible', 'À installer depuis ton Mac'),
+          _ => ('Nouvelle version ${release.name}', release.notes),
+        };
+        return Container(
+          margin: const EdgeInsets.fromLTRB(8, 0, 8, 6),
+          padding: const EdgeInsets.fromLTRB(16, 8, 4, 8),
+          decoration: BoxDecoration(color: const Color(0xFF2A2A2A), borderRadius: BorderRadius.circular(8)),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.system_update_rounded, color: spotifyGreen),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(title, style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700)),
+                        if (subtitle.isNotEmpty)
+                          Text(
+                            subtitle,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: textTheme.bodySmall?.copyWith(color: Colors.white60),
+                          ),
+                      ],
+                    ),
+                  ),
+                  if (state is! UpdateDownloading) ...[
+                    TextButton(
+                      onPressed: updater.install,
+                      child: Text(
+                        state is UpdateFailed
+                            ? 'Réessayer'
+                            : updater.ios
+                            ? 'Voir'
+                            : 'Installer',
+                      ),
+                    ),
+                    IconButton(
+                      tooltip: 'Plus tard',
+                      icon: const Icon(Icons.close_rounded, size: 20),
+                      onPressed: () => updater.dismiss(release),
+                    ),
+                  ],
+                ],
+              ),
+              if (state is UpdateDownloading)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(0, 8, 12, 4),
+                  child: LinearProgressIndicator(value: state.progress, minHeight: 3),
+                ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import 'app_actions.dart';
 import 'player_state.dart';
+import 'updater.dart';
 import 'web_bridge.dart';
 
 /// The app's settings, and ways out when one of its screens shows the page
@@ -48,6 +49,15 @@ Future<void> showSettings(BuildContext context, AppActions app) => showModalBott
                 },
               ),
             ListTile(
+              leading: const Icon(Icons.fact_check_outlined),
+              title: const Text('Diagnostic'),
+              subtitle: const Text("Essayer chaque fonction de l'app sur la vraie page"),
+              onTap: () {
+                Navigator.of(context).pop();
+                app.openDiagnostic();
+              },
+            ),
+            ListTile(
               leading: const Icon(Icons.bug_report_outlined),
               title: const Text('Copier le rapport de la page'),
               subtitle: const Text("À envoyer quand un écran s'affiche mal"),
@@ -70,9 +80,57 @@ Future<void> showSettings(BuildContext context, AppActions app) => showModalBott
                 app.bridge.reload();
               },
             ),
+            _VersionTile(app: app),
           ],
         ),
       ),
     ),
   ),
 );
+
+/// The app's version; a tap looks for a newer one (or installs it).
+class _VersionTile extends StatelessWidget {
+  const _VersionTile({required this.app});
+
+  final AppActions app;
+
+  Future<void> _onTap() async {
+    final updater = app.updater;
+    if (updater.state.value is UpdateAvailable) {
+      await updater.install();
+      return;
+    }
+    await updater.check(manual: true);
+    switch (updater.state.value) {
+      case UpToDate():
+        app.notify('Tu as la dernière version');
+      case UpdateFailed(:final message):
+        app.notify(message);
+      case UpdateAvailable(:final release):
+        app.notify('Version ${release.name} disponible');
+      default:
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final updater = app.updater;
+    return ValueListenableBuilder<UpdateState>(
+      valueListenable: updater.state,
+      builder: (context, state, _) => ListTile(
+        leading: const Icon(Icons.info_outline_rounded),
+        title: Text('Version $appVersionLabel'),
+        subtitle: Text(switch (state) {
+          _ when !updater.enabled => 'Construite hors de GitHub : pas de mises à jour',
+          UpdateChecking() => 'Recherche de mises à jour…',
+          UpToDate() => 'À jour',
+          UpdateAvailable(:final release) => 'Version ${release.name} disponible : toucher pour installer',
+          UpdateDownloading(:final release) => 'Téléchargement de la version ${release.name}…',
+          UpdateFailed(:final message) => message,
+          UpdateIdle() => 'Toucher pour chercher une mise à jour',
+        }),
+        onTap: updater.enabled && state is! UpdateChecking && state is! UpdateDownloading ? _onTap : null,
+      ),
+    );
+  }
+}

@@ -60,4 +60,6 @@ dependencies {
     // The page runs in GeckoView rather than Android WebView, which Spotify refuses
     // to play in. arm64 only: every current phone, and keeps the APK smaller.
     implementation("org.mozilla.geckoview:geckoview-arm64-v8a:157.0.20260924084938")
+    // FileProvider, for in-app updates (GeckoView brings a newer androidx.core).
+    implementation("androidx.core:core:1.13.1")
 }

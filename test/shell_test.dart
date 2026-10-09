@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:spotiweb/src/shell.dart';
+import 'package:spotiweb/src/updater.dart';
 import 'package:spotiweb/src/web_bridge.dart';
 
 import 'support/fake_page.dart';
@@ -75,6 +76,41 @@ void main() {
     await tester.tap(find.text("Retour à l'app"));
     await tester.pump();
     expect(shown(find.text('Titres likés')), findsOneWidget);
+  });
+
+  testWidgets('a newer build: a banner to install it', (tester) async {
+    final installed = <String>[];
+    final updater = Updater(
+      build: 5,
+      ios: false,
+      fetchJson: (_) async => {'build': 7, 'notes': 'Diagnostic et mises à jour'},
+      download: (url, release, onProgress) async => '/cache/spotiweb-${release.build}.apk',
+      installApk: (path) async => installed.add(path),
+    );
+    addTearDown(updater.dispose);
+    page = FakePage(tester);
+    page.answers['read'] = (arg) => complete('home');
+    bridge = WebBridge();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Shell(bridge: bridge, webView: webView, updater: updater),
+      ),
+    );
+    await page.state({});
+    await page.settle();
+    expect(find.text('Nouvelle version 1.0.7'), findsNothing);
+
+    await updater.check();
+    await tester.pump();
+    expect(find.text('Nouvelle version 1.0.7'), findsOneWidget);
+    expect(find.text('Diagnostic et mises à jour'), findsOneWidget);
+    await tester.tap(find.text('Installer'));
+    await tester.pump();
+    expect(installed, ['/cache/spotiweb-7.apk']);
+
+    await tester.tap(find.byTooltip('Plus tard'));
+    await tester.pump();
+    expect(find.text('Nouvelle version 1.0.7'), findsNothing);
   });
 
   testWidgets('the web interface, when chosen: the page with the bottom bar', (tester) async {
