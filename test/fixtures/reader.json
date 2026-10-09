@@ -17,6 +17,7 @@
     "title": "",
     "path": "",
     "total": null,
+    "rows": false,
     "items": [
      {
       "path": "/collection/tracks",
@@ -62,6 +63,7 @@
     "title": "Section 0",
     "path": "/section/s0",
     "total": null,
+    "rows": false,
     "items": [
      {
       "path": "/playlist/h0x0",
@@ -127,6 +129,7 @@
     "title": "Section 1",
     "path": "/section/s1",
     "total": null,
+    "rows": false,
     "items": [
      {
       "path": "/playlist/h1x0",
@@ -192,6 +195,7 @@
     "title": "Section 2",
     "path": "/section/s2",
     "total": null,
+    "rows": false,
     "items": [
      {
       "path": "/playlist/h2x0",
@@ -279,6 +283,7 @@
     "title": "",
     "path": "",
     "total": 8,
+    "rows": false,
     "items": [
      {
       "uri": "spotify:track:p2t0",
@@ -372,6 +377,7 @@
     "title": "Recommandés",
     "path": "/section/reco",
     "total": null,
+    "rows": false,
     "items": [
      {
       "path": "/album/reco0",
@@ -445,6 +451,7 @@
     "title": "",
     "path": "",
     "total": 12,
+    "rows": false,
     "items": [
      {
       "uri": "spotify:track:al7t0",
@@ -543,6 +550,7 @@
     "title": "Populaires",
     "path": "",
     "total": 10,
+    "rows": false,
     "items": [
      {
       "uri": "spotify:track:popar3t0",
@@ -600,6 +608,7 @@
     "title": "Discographie",
     "path": "/artist/ar3/discography/all",
     "total": null,
+    "rows": false,
     "items": [
      {
       "path": "/album/ar3d0",
@@ -645,6 +654,7 @@
     "title": "Les fans aiment aussi",
     "path": "/artist/ar3/related",
     "total": null,
+    "rows": false,
     "items": [
      {
       "path": "/artist/fan0",
@@ -705,6 +715,7 @@
     "title": "Meilleur résultat",
     "path": "",
     "total": null,
+    "rows": false,
     "items": [
      {
       "path": "/artist/ar5",
@@ -723,6 +734,7 @@
     "title": "Titres",
     "path": "",
     "total": 4,
+    "rows": false,
     "items": [
      {
       "uri": "spotify:track:s9t0",
@@ -804,6 +816,7 @@
     "title": "Artistes",
     "path": "/search/daft punk/artists",
     "total": null,
+    "rows": false,
     "items": [
      {
       "path": "/artist/ar0",
@@ -849,6 +862,7 @@
     "title": "Playlists",
     "path": "/search/daft punk/playlists",
     "total": null,
+    "rows": false,
     "items": [
      {
       "path": "/playlist/sp0",
@@ -909,6 +923,7 @@
     "title": "Parcourir tout",
     "path": "",
     "total": null,
+    "rows": false,
     "items": [
      {
       "path": "/genre/g0",
@@ -1150,7 +1165,7 @@
   "adBlock": true,
   "playing": true,
   "positionMs": 0,
-  "positionAt": 1791208183063,
+  "positionAt": 1791548531223,
   "durationMs": 180000,
   "shuffle": 0,
   "repeat": 0,
@@ -1342,5 +1357,159 @@
   ],
   "active": 0,
   "uri": "spotify:track:p2t0"
+ },
+ "searchList": {
+  "path": "/search/daft",
+  "kind": "search",
+  "title": "",
+  "label": "",
+  "lines": [],
+  "links": [],
+  "image": "",
+  "canPlay": false,
+  "hasMenu": false,
+  "saved": null,
+  "blocks": [
+   {
+    "key": "entity|#0",
+    "type": "entity",
+    "title": "",
+    "path": "",
+    "total": null,
+    "rows": true,
+    "items": [
+     {
+      "path": "/track/sv4t0",
+      "uri": "spotify:track:sv4t0",
+      "kind": "track",
+      "title": "daft un",
+      "subtitle": "Titre • Artiste 1, Artiste 2",
+      "image": "https://i.scdn.co/image/sv4t0-300",
+      "links": [
+       {
+        "name": "Artiste 1",
+        "path": "/artist/ar1"
+       },
+       {
+        "name": "Artiste 2",
+        "path": "/artist/ar2"
+       }
+      ]
+     },
+     {
+      "path": "/artist/ar5",
+      "uri": "spotify:artist:ar5",
+      "kind": "artist",
+      "title": "Artiste 5",
+      "subtitle": "Artiste",
+      "image": "https://i.scdn.co/image/ar5-300",
+      "links": []
+     },
+     {
+      "path": "/track/sv4t1",
+      "uri": "spotify:track:sv4t1",
+      "kind": "track",
+      "title": "daft deux",
+      "subtitle": "Titre • Artiste 1, Artiste 3",
+      "image": "https://i.scdn.co/image/sv4t1-300",
+      "links": [
+       {
+        "name": "Artiste 1",
+        "path": "/artist/ar1"
+       },
+       {
+        "name": "Artiste 3",
+        "path": "/artist/ar3"
+       }
+      ]
+     },
+     {
+      "path": "/track/sv4t2",
+      "uri": "spotify:track:sv4t2",
+      "kind": "track",
+      "title": "daft trois",
+      "subtitle": "Titre • Artiste 4, Artiste 1",
+      "image": "https://i.scdn.co/image/sv4t2-300",
+      "links": [
+       {
+        "name": "Artiste 4",
+        "path": "/artist/ar4"
+       },
+       {
+        "name": "Artiste 1",
+        "path": "/artist/ar1"
+       }
+      ]
+     },
+     {
+      "path": "/album/sv4al",
+      "uri": "spotify:album:sv4al",
+      "kind": "album",
+      "title": "daft album",
+      "subtitle": "Album • Artiste 1",
+      "image": "https://i.scdn.co/image/sv4al-300",
+      "links": [
+       {
+        "name": "Artiste 1",
+        "path": "/artist/ar1"
+       }
+      ]
+     },
+     {
+      "path": "/track/sv4t3",
+      "uri": "spotify:track:sv4t3",
+      "kind": "track",
+      "title": "daft quatre",
+      "subtitle": "Titre • Artiste 1",
+      "image": "https://i.scdn.co/image/sv4t3-300",
+      "links": [
+       {
+        "name": "Artiste 1",
+        "path": "/artist/ar1"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "key": "entity|Vidéos",
+    "type": "entity",
+    "title": "Vidéos",
+    "path": "",
+    "total": null,
+    "rows": false,
+    "items": [
+     {
+      "path": "/track/vid4x0",
+      "uri": "spotify:track:vid4x0",
+      "kind": "track",
+      "title": "Vidéo 0",
+      "subtitle": "Artiste 1",
+      "image": "https://i.scdn.co/image/vid0-300",
+      "links": [
+       {
+        "name": "Artiste 1",
+        "path": "/artist/ar1"
+       }
+      ]
+     },
+     {
+      "path": "/track/vid4x1",
+      "uri": "spotify:track:vid4x1",
+      "kind": "track",
+      "title": "Vidéo 1",
+      "subtitle": "Artiste 1",
+      "image": "https://i.scdn.co/image/vid1-300",
+      "links": [
+       {
+        "name": "Artiste 1",
+        "path": "/artist/ar1"
+       }
+      ]
+     }
+    ]
+   }
+  ],
+  "complete": false
  }
 }

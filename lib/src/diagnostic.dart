@@ -286,7 +286,8 @@ class Diagnostic {
     ];
     if (blocks.isEmpty) return r.copyWith(status: CheckStatus.failed, detail: '« $query » : aucun résultat lu');
     final titles = _some(blocks.map((block) => block.title.isEmpty ? '(sans titre)' : block.title));
-    final songs = blocks.any((block) => block.tracks.isNotEmpty);
+    // Songs: a track list, or tracks among the results.
+    final songs = blocks.any((block) => block.tracks.isNotEmpty || block.cards.any((card) => card.kind == 'track'));
     return r.copyWith(
       status: songs ? CheckStatus.ok : CheckStatus.partial,
       detail: '« $query » : $titles${songs ? '' : ' (pas de titres)'}',
@@ -322,8 +323,12 @@ class Diagnostic {
     ];
     if (sections.isEmpty) return r.copyWith(status: CheckStatus.partial, detail: 'File vide, ou pas lue');
     final titles = _some(sections.map((s) => '${s.title.isEmpty ? '(sans titre)' : s.title} (${s.tracks.length})'));
+    // The queue starts with what plays: without it, what was read is something else.
     final current = sections.first.tracks.any((track) => track.uri.isNotEmpty && track.uri == data.current);
-    return r.copyWith(status: CheckStatus.ok, detail: '$titles${current ? '' : ', titre en cours non repéré'}');
+    return r.copyWith(
+      status: current ? CheckStatus.ok : CheckStatus.partial,
+      detail: '$titles${current ? '' : ', titre en cours non repéré'}',
+    );
   }
 
   Future<CheckResult> _lyrics(CheckResult r) async {

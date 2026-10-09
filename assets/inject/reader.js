@@ -14,8 +14,7 @@
   const api = window.__spotiweb;
   if (!api || !api.internals || api.reader) return;
   api.reader = true;
-  const { commands, post, byTestId, navigate, nowPlayingBar, barControl, setOverlay, openPanel, closePanel } =
-    api.internals;
+  const { commands, post, byTestId, navigate, nowPlayingBar, barControl, setOverlay, openPanel } = api.internals;
   const { holdPanel } = api.internals;
   const { isPlaying, trackUri } = api.internals;
   // <html>: there is none yet when this runs, at the start of the document.
@@ -219,6 +218,7 @@
 
   const ROW = '[data-testid="tracklist-row"]';
   const GRID = '[role="grid"], [role="treegrid"], [aria-rowcount]';
+  const LIST = '[role="grid"], [role="treegrid"], [role="list"]';
   const TITLE_IDS = '[id^="card-title-spotify:"], [id^="listrow-title-spotify:"]';
   const ITEM_ROOTS = '[role="row"], [role="listitem"], [role="treeitem"], [role="group"], [data-encore-id="card"], li';
   const HEADINGS = 'h1, h2, h3, h4, [role="heading"]';
@@ -227,8 +227,12 @@
   const PLAY_LABEL =
     /^(?:play|pause|lire|lecture|écouter|reproducir|pausar|pausa|wiedergabe|abspielen|riproduci|tocar|afspelen|spela)\b/i;
   // Parts of the page that are not part of what they hold (menus over a page…).
+  // The footer (Spotify's other sites, and a playlist or two) is no page's own.
   const AWAY =
-    '[role="dialog"], [role="alertdialog"], [role="menu"], [data-testid="now-playing-bar"], #Desktop_LeftSidebar_Id, #Desktop_PanelContainer_Id, [data-testid="topbar-content-wrapper"], [data-testid="user-widget-link"]';
+    '[role="dialog"], [role="alertdialog"], [role="menu"], [data-testid="now-playing-bar"], #Desktop_LeftSidebar_Id, #Desktop_PanelContainer_Id, [data-testid="topbar-content-wrapper"], [data-testid="user-widget-link"], [data-testid="footer-div"]';
+  // A page still loading shows this instead (and the footer under it).
+  const LOADING = '[data-testid="loading-page"]';
+  const loading = (scope) => [...scope.querySelectorAll(LOADING)].some(laidOut);
 
   // el sits in a part of scope that is not scope's own content.
   const away = (el, scope) => {
@@ -255,13 +259,14 @@
 
     for (const row of scope.querySelectorAll(ROW)) add(row, 'track');
     for (const title of scope.querySelectorAll(TITLE_IDS)) {
+      if (away(title, scope)) continue;
       const holder = title.closest(ITEM_ROOTS);
       const own = holder && scope.contains(holder) && holder.querySelectorAll(TITLE_IDS).length === 1;
       add(own ? holder : climb(title, scope, uriPath(title.id.replace(/^\w+-title-/, ''))), 'entity', title);
     }
     for (const link of scope.querySelectorAll('a[href]')) {
       const path = entityPath(link.getAttribute('href'));
-      if (!path || inItem(link)) continue;
+      if (!path || inItem(link) || away(link, scope)) continue;
       const holder = climb(link, scope, path);
       // A section's title or its "show all" link: not an item.
       if (!holder.querySelector('img') && nearHeading(link)) continue;
@@ -270,7 +275,8 @@
     if (loose) {
       // Rows without a link (some lists only have buttons): rows with a picture.
       for (const row of scope.querySelectorAll('[role="row"], [role="listitem"], li')) {
-        if (row.querySelector('[role="row"], [role="listitem"], li') || !row.querySelector('img')) continue;
+        if (row.querySelector('[role="row"], [role="listitem"], li') || !row.querySelector('img') || away(row, scope))
+          continue;
         add(row, 'entity');
       }
     }
@@ -355,6 +361,29 @@
     };
   }
 
+  // A subtitle as the page shows it: its parts ("Titre", "Vacra, PLK") set
+  // apart by the page's style, without its badges (the E of explicit tracks).
+  function subtitleOf(el) {
+    const own = (node) => [...node.childNodes].some((child) => child.nodeType === 3 && clean(child.textContent));
+    const plain = (node) => {
+      if (node.matches('[role="img"]')) return '';
+      let text = '';
+      const walker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT);
+      for (let leaf = walker.nextNode(); leaf; leaf = walker.nextNode()) {
+        const badge = leaf.parentElement.closest('[role="img"]');
+        if (!badge || !node.contains(badge)) text += leaf.textContent;
+      }
+      return clean(text);
+    };
+    let node = el;
+    while (node.children.length === 1 && !own(node)) node = node.children[0];
+    if (own(node)) return plain(node);
+    return [...node.children]
+      .map(plain)
+      .filter((part) => part && !/^[•·,|-]$/.test(part))
+      .join(' • ');
+  }
+
   function readEntity(el, titleEl) {
     titleEl = titleEl || el.querySelector(TITLE_IDS);
     const ownUri = titleEl ? titleEl.id.replace(/^\w+-title-/, '') : '';
@@ -379,7 +408,7 @@
     if (!title) title = lines[0] || clean(el.getAttribute('aria-label'));
     const subtitleEl = el.querySelector('[id^="card-subtitle-"], [id^="listrow-subtitle-"]');
     const subtitle = subtitleEl
-      ? textOf(subtitleEl)
+      ? subtitleOf(subtitleEl)
       : lines
           .filter((l) => l !== title)
           .slice(0, 2)
@@ -464,7 +493,7 @@
       if (heading) {
         key = `${item.type}|${textOf(heading)}`;
       } else {
-        const parent = item.type === 'track' ? holder : item.el.parentElement;
+        const parent = item.type === 'track' ? holder : item.el.closest(LIST) || item.el.parentElement;
         if (!unnamed.has(parent)) unnamed.set(parent, `${item.type}|#${unnamed.size}`);
         key = unnamed.get(parent);
       }
@@ -479,12 +508,24 @@
           path: heading ? headingLink(heading, inItem) : '',
           // Track lists count their header row.
           total: count > 0 ? count - 1 : null,
+          rows: false,
           items: [],
         };
         byKey.set(key, group);
         groups.push(group);
       }
       group.items.push(item);
+    }
+    // Rows of a list (search results), one under the other, rather than cards
+    // side by side (carousels are lists of rows too).
+    for (const group of groups) {
+      const [a, b] = group.items.map((item) => item.el);
+      group.rows =
+        group.type !== 'track' &&
+        !!a.closest('[role="row"]') &&
+        !!a.closest(LIST) &&
+        !a.closest('[data-testid="carousel-scroller"]') &&
+        (!b || b.getBoundingClientRect().top >= a.getBoundingClientRect().bottom - 2);
     }
     return groups;
   }
@@ -574,7 +615,7 @@
         block = { key: group.key, type: group.type, entries: new Map() };
         memo.blocks.set(group.key, block);
       }
-      Object.assign(block, { title: group.title, path: group.path, total: group.total });
+      Object.assign(block, { title: group.title, path: group.path, total: group.total, rows: group.rows });
       for (const item of group.items) {
         const data = itemData(item);
         const id =
@@ -594,6 +635,7 @@
         title: block.title,
         path: block.path,
         total: block.total,
+        rows: block.rows,
         items: entries,
       };
     });
@@ -617,6 +659,16 @@
   }
 
   // ------------------------------------------------------------- navigating
+  // The page hidden by the lyrics, left open (they show instead of it): closed,
+  // unless the app is showing them.
+  async function revealMain(job) {
+    if (laidOut(mainView()) || lyricsWatch || !lyricLines().length) return;
+    const button = barControl('lyrics-button');
+    if (!button) return;
+    button.click();
+    await waitFor(() => laidOut(mainView()), 2000, job);
+  }
+
   // What the main view shows, to tell when the next page replaced it.
   function signature() {
     const scope = mainView();
@@ -627,12 +679,14 @@
       const path = entityPath(link.getAttribute('href'));
       if (path && !away(link, scope)) parts.push(path);
     }
-    return { key: parts.join('|'), ready: !!(parts[0] || parts.length > 1 || scope.querySelector(ROW)) };
+    const shown = !!(parts[0] || parts.length > 1 || scope.querySelector(ROW));
+    return { key: parts.join('|'), ready: shown && !loading(scope) };
   }
 
   // Takes the page to path (through its own router) and waits for it to show.
   async function open(path, job) {
     closeMenus();
+    await revealMain(job);
     if (here() !== path) {
       const from = here();
       const before = signature().key;
@@ -653,6 +707,8 @@
         job,
       );
       if (here() !== landed) throw new Error(`left ${path} for ${here()}`);
+      // Slow to load (an artist's page on a phone): a while longer.
+      if (loading(mainView())) await waitFor(() => !loading(mainView()), 6000, job);
     } else {
       // Maybe still loading (the app just started).
       await waitFor(() => signature().ready, 10000, job);
@@ -692,14 +748,25 @@
     return true;
   }
 
-  // A track's row, by its position in the list (and its uri, to be sure).
+  // A track's row, by its position in the list (and its uri, to be sure); one
+  // not shown will do (it can still be double clicked).
   function rowFor(scope, uri, index) {
-    const rows = [...scope.querySelectorAll(ROW)].filter(laidOut);
+    const all = [...scope.querySelectorAll(ROW)];
+    const rows = all.filter(laidOut);
     return (
       rows.find((row) => rowIndex(row) === index && (!uri || rowUri(row) === uri)) ||
-      (uri ? rows.find((row) => rowUri(row) === uri) : null) ||
+      (uri ? rows.find((row) => rowUri(row) === uri) || all.find((row) => rowUri(row) === uri) : null) ||
       null
     );
+  }
+
+  // Why a row could not be found, for the report.
+  function rowsSeen(scope) {
+    const all = [...scope.querySelectorAll(ROW)];
+    const indices = all.map(rowIndex).filter(Boolean);
+    const range = indices.length ? `, n° ${Math.min(...indices)}–${Math.max(...indices)}` : '';
+    const hidden = laidOut(scope) ? '' : ', page hidden';
+    return `${all.length} rows, ${all.filter(laidOut).length} shown${range}${hidden}`;
   }
 
   async function findRow(scope, target, job) {
@@ -766,7 +833,7 @@
     const path = normalize(arg.path);
     await open(path, job);
     const row = await findRow(mainView(), arg, job);
-    if (!row) throw new Error('track not found');
+    if (!row) throw new Error(`track not found (n° ${arg.index}; ${rowsSeen(mainView())})`);
     await startRow(row, arg.uri, job);
     return true;
   }
@@ -1082,7 +1149,7 @@
       kind,
       title: name,
       subtitle: subtitle
-        ? textOf(subtitle)
+        ? subtitleOf(subtitle)
         : linesOf(row)
             .filter((l) => l !== name)
             .slice(0, 2)
@@ -1103,20 +1170,38 @@
   };
   const pressed = (button) => toggled(button) === true;
 
-  // The panel shows the queue: its button says so (or, when it doesn't tell,
-  // the panel has tracks).
+  // The side panel's "now playing" view (the track's lyrics preview, videos,
+  // merch…): the panel shows it rather than the queue.
+  const NOW_PLAYING_VIEW =
+    '[data-testid="lyrics-npv-section"], [data-testid^="npv-"], [data-testid="NPV_Panel_OpenDiv"]';
+  const nowPlayingShown = () => {
+    const scope = panel();
+    return !!scope && [...scope.querySelectorAll(NOW_PLAYING_VIEW)].some(laidOut);
+  };
+
+  // The panel shows the queue: its tracks, not the "now playing" view (nor
+  // the queue's button saying it is off).
   const queueShown = () => {
     const scope = panel();
-    if (!scope || !laidOut(scope)) return false;
-    const on = toggled(barControl('control-button-queue'));
-    return on === null ? collectItems(scope, null, true).length > 0 : on;
+    if (!scope || !laidOut(scope) || nowPlayingShown()) return false;
+    if (toggled(barControl('control-button-queue')) === false) return false;
+    return collectItems(scope, null, true).length > 0;
   };
 
   async function showQueue(job) {
-    if (!barControl('control-button-queue')) throw new Error('no queue');
-    if (!queueShown()) openPanel('control-button-queue');
-    if (!(await waitFor(queueShown, 3000, job))) throw new Error('no queue');
-    await waitFor(() => collectItems(panel(), null, true).length, 3000, job);
+    const button = barControl('control-button-queue');
+    if (!button) throw new Error('no queue');
+    setOverlay('panel', true);
+    if (!queueShown()) {
+      // Something else there (or nothing): the button opens the queue. The
+      // queue itself, its list on its way: pressed, the button would close it.
+      const scope = panel();
+      const other = !scope || !scope.children.length || nowPlayingShown() || toggled(button) === false;
+      if ((other || !(await waitFor(queueShown, 1000, job))) && toggled(button) !== true) button.click();
+      if (!(await waitFor(queueShown, 5000, job))) {
+        throw new Error(`no queue (${nowPlayingShown() ? 'now playing view' : 'panel without tracks'})`);
+      }
+    }
     await settled(panel(), 200, 1500);
   }
 
@@ -1154,11 +1239,12 @@
       if (!queueWatch) return;
       const scope = panel();
       if (scope && !laidOut(scope)) setOverlay('panel', true);
-      if (toggled(barControl('control-button-queue')) === false) {
-        // Closed by the page (another panel): open it again, not too often.
-        if (Date.now() - reopenedAt > 3000) {
+      const button = barControl('control-button-queue');
+      if (toggled(button) === false || nowPlayingShown()) {
+        // Replaced by the page (another view of the panel): open it again, not too often.
+        if (button && Date.now() - reopenedAt > 3000) {
           reopenedAt = Date.now();
-          openPanel('control-button-queue');
+          if (toggled(button) !== true) button.click();
         }
         return;
       }
@@ -1207,11 +1293,13 @@
   }
 
   // ------------------------------------------------------------------- lyrics
-  const LYRIC = '[data-testid="fullscreen-lyric"]';
+  const LYRIC = '[data-testid="lyrics-line"], [data-testid="fullscreen-lyric"]';
+  const LYRICS_PREVIEW = '[data-testid="lyrics-npv-section"]';
   let lyricsWatch = null;
   let lyricsOpened = false;
 
-  const lyricLines = () => [...document.querySelectorAll(LYRIC)].filter(laidOut);
+  const lyricLines = () =>
+    [...document.querySelectorAll(LYRIC)].filter((line) => laidOut(line) && !line.closest(LYRICS_PREVIEW));
 
   // The line being sung. Lines already sung, the one being sung and those to
   // come look different (classes, style): runs of alike lines tell them apart.
@@ -1220,7 +1308,9 @@
       (l) => l.getAttribute('aria-current') === 'true' || l.matches('[aria-current="true"] *'),
     );
     if (current >= 0) return current;
-    const looks = lines.map((l) => `${l.className}|${l.getAttribute('style') || ''}`);
+    // The line's look, or its text's (where the page marks it).
+    const lookOf = (el) => (el ? `${el.className}|${el.getAttribute('style') || ''}` : '');
+    const looks = lines.map((l) => `${lookOf(l)}/${lookOf(l.firstElementChild)}`);
     const runs = [];
     looks.forEach((look, i) => {
       const run = runs[runs.length - 1];
@@ -1292,13 +1382,16 @@
     };
   }
 
+  // Closed if the app opened them: they show instead of the page.
   function stopLyrics(close = true) {
     if (lyricsWatch) lyricsWatch.stop();
     lyricsWatch = null;
     if (close && lyricsOpened) {
       lyricsOpened = false;
-      if (pressed(barControl('lyrics-button'))) closePanel();
-      else setOverlay('panel', false);
+      const button = barControl('lyrics-button');
+      const shown = lyricLines().length > 0 || pressed(button);
+      setOverlay('panel', false);
+      if (button && shown) button.click();
     }
     return true;
   }
@@ -1354,15 +1447,47 @@
     for (const child of node.children) outline(child, depth + 1, out, budget);
   }
 
+  const STATES = [
+    'role',
+    'data-testid',
+    'aria-rowindex',
+    'aria-rowcount',
+    'aria-haspopup',
+    'aria-checked',
+    'aria-pressed',
+    'aria-selected',
+    'aria-current',
+    'aria-expanded',
+    'aria-disabled',
+    'data-active',
+  ];
+
+  // An element in a line: its tag, id, roles and states, where it leads, what
+  // it is called; ⊘ where the page hides it (and what it holds).
   function describe(el) {
     let label = el.tagName.toLowerCase();
     if (el.id) label += `#${el.id.length > 40 ? `${el.id.slice(0, 40)}…` : el.id}`;
-    for (const name of ['role', 'data-testid', 'aria-rowindex', 'aria-rowcount', 'aria-haspopup', 'aria-checked']) {
+    for (const name of STATES) {
       if (el.hasAttribute(name)) label += `[${name}=${el.getAttribute(name)}]`;
     }
     const href = el.getAttribute('href');
     if (href) label += `[href=${href.slice(0, 60)}]`;
+    const name = clean(el.getAttribute('aria-label'));
+    if (name) label += `[aria-label=${name.slice(0, 40)}]`;
+    if (!laidOut(el) && (!el.parentElement || laidOut(el.parentElement))) label += ' ⊘';
     return label;
+  }
+
+  // Where an element sits: it, then those of its ancestors that tell.
+  function placeOf(el) {
+    const chain = [];
+    for (let node = el; node && node !== document.body; node = node.parentElement) {
+      const hides = !laidOut(node) && laidOut(node.parentElement);
+      if (node === el || hides || node.id || node.hasAttribute('data-testid') || node.hasAttribute('role')) {
+        chain.push(describe(node));
+      }
+    }
+    return chain.join(' < ');
   }
 
   const ownText = (el) =>
@@ -1387,7 +1512,8 @@
     ];
     const ids = new Map();
     for (const el of document.querySelectorAll('[data-testid]')) {
-      const id = el.getAttribute('data-testid');
+      // The language picker's hundred options, as one.
+      const id = el.getAttribute('data-testid').replace(/^language-option-.*/, 'language-option-…');
       ids.set(id, (ids.get(id) || 0) + 1);
     }
     out.push(
@@ -1396,18 +1522,38 @@
         .map(([id, n]) => `${id}×${n}`)
         .join(', ')}`,
     );
+    // The player bar's buttons and what they say of their state (toggles: the
+    // queue, the lyrics).
+    const bar = nowPlayingBar();
+    out.push('', '# boutons du lecteur');
+    for (const el of bar ? bar.querySelectorAll('button[data-testid], [data-testid] > button') : []) {
+      out.push(describe(el));
+    }
+    // Where the parts that matter are, and whether they show.
+    out.push('', '# où');
+    const grid = mainView().parentElement;
+    if (grid) out.push(`grille : ${[...grid.children].map(describe).join(' | ')}`);
+    for (const selector of [LYRIC, LYRICS_PREVIEW, ROW, LOADING, '#lyrics-cinema', 'video']) {
+      const all = [...document.querySelectorAll(selector)];
+      if (!all.length) continue;
+      const shown = all.filter(laidOut);
+      out.push(`${selector} ×${all.length} (${shown.length} affichés) : ${placeOf(shown[0] || all[0])}`);
+    }
+    const lyricsView = document.getElementById('lyrics-cinema');
     for (const [name, el, budget] of [
       ['page', mainView(), 700],
       ['panneau', panel(), 250],
+      ['paroles', lyricsView, 100],
       ['bibliothèque', sidebar(), 150],
       ['menus', openMenus()[0], 80],
     ]) {
+      if (!el && name === 'paroles') continue;
       out.push('', `# ${name}`);
       const part = [];
       outline(el, 0, part, Math.round(budget * scale));
       out.push(...part);
     }
-    out.push('', '# lecture', JSON.stringify(snapshot(here())).slice(0, 8000));
+    out.push('', '# lecture', JSON.stringify(snapshot(here())).slice(0, Math.max(1500, Math.round(8000 * scale))));
     return out.join('\n');
   }
 

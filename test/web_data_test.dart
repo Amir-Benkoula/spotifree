@@ -26,6 +26,16 @@ void main() {
     expect(track.duration, '2:30');
   });
 
+  test('search results in one list, rows of all kinds', () {
+    final page = WebPage.fromJson(fixture('searchList'));
+    final list = page.blocks.first;
+    expect(list.rows, isTrue);
+    expect(list.cards.map((card) => card.kind), ['track', 'artist', 'track', 'track', 'album', 'track']);
+    expect(list.cards.first.subtitle, 'Titre • Artiste 1, Artiste 2');
+    expect(page.blocks[1].title, 'Vidéos');
+    expect(page.blocks[1].rows, isFalse);
+  });
+
   test('the home page: shortcuts, then titled shelves of cards', () {
     final page = WebPage.fromJson(fixture('home'));
     expect(page.kind, 'home');

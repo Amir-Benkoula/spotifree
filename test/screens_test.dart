@@ -121,6 +121,33 @@ void main() {
     expect(app.opened.last, '/search/daft punk/artists');
   });
 
+  testWidgets('search: results in one list, a track plays, the rest opens', (tester) async {
+    await start(tester);
+    page.answers['read'] = (arg) => arg['path'] == '/search' ? complete('browse') : complete('searchList');
+    page.answers['playCard'] = (_) => true;
+    await tester.pumpWidget(MaterialApp(home: SearchScreen(app: app)));
+    await page.settle();
+    await tester.enterText(find.byType(TextField), 'daft');
+    await tester.pump(const Duration(milliseconds: 700));
+    await page.settle();
+    // A list, as the page shows it: each result with what it is.
+    expect(find.text('daft un'), findsOneWidget);
+    expect(find.text('Titre • Artiste 1, Artiste 2'), findsOneWidget);
+    expect(find.text('Album • Artiste 1'), findsOneWidget);
+    expect(find.text('Vidéos'), findsOneWidget);
+
+    await tester.tap(find.text('daft deux'));
+    await page.settle();
+    expect(
+      page.argsOf('playCard').single,
+      allOf(containsPair('path', '/search/daft'), containsPair('target', '/track/sv4t1')),
+    );
+    expect(app.opened, isEmpty);
+
+    await tester.tap(find.text('Artiste 5'));
+    expect(app.opened.single, '/artist/ar5');
+  });
+
   testWidgets('the library: filters, pages, folders', (tester) async {
     await start(tester);
     page.answers['readLibrary'] = (_) => withoutImages(fixture('library'));

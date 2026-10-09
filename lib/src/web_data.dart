@@ -137,6 +137,7 @@ class WebBlock {
     this.total,
     this.tracks = const [],
     this.cards = const [],
+    this.rows = false,
   });
 
   factory WebBlock.fromJson(JsonMap json) {
@@ -149,6 +150,7 @@ class WebBlock {
       total: _int(json, 'total'),
       tracks: tracks ? [for (final item in items) WebTrack.fromJson(item)] : const [],
       cards: tracks ? const [] : [for (final item in items) WebCard.fromJson(item)],
+      rows: json['rows'] == true,
     );
   }
 
@@ -162,6 +164,9 @@ class WebBlock {
   final int? total;
   final List<WebTrack> tracks;
   final List<WebCard> cards;
+
+  /// The page lists its cards one per row (search results), rather than side by side.
+  final bool rows;
 
   bool get isTracks => tracks.isNotEmpty;
 }

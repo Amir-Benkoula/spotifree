@@ -483,6 +483,15 @@ Future<void> playTrackOf(AppActions app, String path, WebTrack track) async {
   }
 }
 
+/// Plays what a card leads to (a track) from the page that shows it.
+Future<void> playCardOf(AppActions app, String path, WebCard card) async {
+  try {
+    await app.content.playCard(path, card);
+  } on WebError catch (error) {
+    if (!error.cancelled) app.notify('Lecture impossible : ${error.message}');
+  }
+}
+
 /// Plays a page from the start (pause when it is what plays).
 Future<void> playPageOf(AppActions app, WebPage page, PlayerState state) async {
   if (isPlayingFrom(page, state)) {
@@ -508,6 +517,7 @@ enum _CardLayout { shortcuts, shelf, grid, genres, list, top }
 _CardLayout _layoutOf(WebPage page, WebBlock block, int position) {
   final cards = block.cards;
   if (cards.every((card) => card.kind == 'genre')) return _CardLayout.genres;
+  if (block.rows) return _CardLayout.list;
   if (page.kind == 'home' && block.title.isEmpty && position == 0) return _CardLayout.shortcuts;
   if (page.kind == 'search' && cards.length == 1 && position == 0) return _CardLayout.top;
   if (cards.where((card) => card.kind == 'episode').length * 2 > cards.length) return _CardLayout.list;
@@ -528,7 +538,9 @@ List<Widget> blockSlivers(
   required PlayerState state,
 }) {
   final slivers = <Widget>[];
-  void openCard(WebCard card) => app.openPath(card.path, preview: card);
+  // A track plays (from where the page shows it); anything else opens.
+  void openCard(WebCard card) =>
+      card.kind == 'track' ? playCardOf(app, page.path, card) : app.openPath(card.path, preview: card);
   void cardMenu(WebCard card) => app.showMenu(CardTarget(card), path: page.path, header: MenuHeader.card(card));
 
   for (final (position, block) in page.blocks.indexed) {
