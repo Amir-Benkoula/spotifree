@@ -27,3 +27,5 @@ flutter:
     # Built-in GeckoView extension (manifest.json): script and stylesheet
     # injected into open.spotify.com.
     - assets/inject/
+    # The app's icon, on its splash (tool/icon/make.js).
+    - assets/icon/icon.png

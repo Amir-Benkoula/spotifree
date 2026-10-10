@@ -1,11 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Status bar and media notification icon: white on transparent, the system tints it. -->
+<!-- Status bar and media notification icon: the icon's note, white on
+     transparent, the system tints it (tool/icon/make.js). -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="24dp"
     android:height="24dp"
     android:viewportWidth="24"
     android:viewportHeight="24">
-    <path
-        android:fillColor="#FFFFFFFF"
-        android:pathData="M12,3v10.55c-0.59,-0.34 -1.27,-0.55 -2,-0.55 -2.21,0 -4,1.79 -4,4s1.79,4 4,4 4,-1.79 4,-4V7h4V3h-6z" />
+    <group
+        android:scaleX="0.3875"
+        android:scaleY="0.3875"
+        android:translateX="-8.923"
+        android:translateY="-8.380">
+        <path android:fillColor="#FFFFFFFF" android:pathData="M32.5,65.5 a14.2,14.2 0 1 0 28.4,0 a14.2,14.2 0 1 0 -28.4,0 Z" />
+        <path android:fillColor="#FFFFFFFF" android:pathData="M57.7,25.5 a3.2,3.2 0 0 1 3.2,3.2 V66.9 H54.5 V28.7 a3.2,3.2 0 0 1 3.2,-3.2 Z" />
+        <path android:fillColor="#FFFFFFFF" android:pathData="M60.3,26.7 C66.4,28.7 75.4,34.5 74.9,45 C74.7,49 73.1,52.5 70.9,55 C71.9,48.5 69.4,42 60.3,39.5 Z" />
+    </group>
 </vector>

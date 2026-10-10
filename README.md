@@ -72,6 +72,14 @@ sur la vraie page et dit ce qui marche, avec un rapport à copier pour corriger
 le reste ; « Voir la page web » montre le site. Le site tel quel, à la place des
 écrans de l'app, reste disponible : réglages > « Interface web ».
 
+## Icône
+
+Une note de musique dont la tête est un globe (la musique, depuis le web), en
+verre avec un léger relief. Elle est dessinée dans `tool/icon/design.js` ;
+`node tool/icon/make.js` en refait toutes les versions : icône adaptative
+d'Android (et sa version monochrome pour les icônes à thème), icône de
+notification, écran de démarrage, icône de l'iPhone (claire, sombre, teintée).
+
 ## Getting Started
 
 This project is a starting point for a Flutter application.

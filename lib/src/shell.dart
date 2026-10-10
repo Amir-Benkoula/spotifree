@@ -618,19 +618,32 @@ class _LoginBanner extends StatelessWidget {
 class _Splash extends StatelessWidget {
   const _Splash();
 
+  /// The icon's size: as the system's launch screen shows it, in the middle
+  /// (tool/icon/make.js), so that one follows the other.
+  static const iconSize = 112.0;
+
   @override
   Widget build(BuildContext context) {
-    return const ColoredBox(
+    // Round like Android's splash screen, Apple's corners on iPhone.
+    final ios = Theme.of(context).platform == TargetPlatform.iOS;
+    return ColoredBox(
       color: Colors.black,
-      child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.graphic_eq_rounded, size: 64, color: spotifyGreen),
-            SizedBox(height: 24),
-            SizedBox.square(dimension: 24, child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white54)),
-          ],
-        ),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(ios ? iconSize * 0.225 : iconSize / 2),
+            child: Image.asset('assets/icon/icon.png', width: iconSize, height: iconSize),
+          ),
+          // Below it, the icon staying where the launch screen had it.
+          Transform.translate(
+            offset: const Offset(0, iconSize / 2 + 52),
+            child: const SizedBox.square(
+              dimension: 24,
+              child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white54),
+            ),
+          ),
+        ],
       ),
     );
   }
