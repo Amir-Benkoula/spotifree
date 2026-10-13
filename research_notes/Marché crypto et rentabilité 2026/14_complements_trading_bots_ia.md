@@ -131,7 +131,7 @@ Début octobre 2026, le funding du BTC est d'environ 11 % annualisé sur Hyperli
 
 **Statut des pistes de la 1re passe (Q3)**
 - Base CME ≈ 3 % (CoinDesk 10/08/2026) et 5,69-7,89 % (CryptoSlate 07/08/2026) : **confirmés** comme deux mesures coexistantes ; l'écart reste non tranché.
-- Titre de The Block du 09/04/2026 : « plus bas de 14 mois », ce qui renvoie à février 2025 et non à « plus bas depuis février 2024 » (1re passe) : **contradiction confirmée, en faveur du titre** ; la formulation « depuis février 2024 » est probablement erronée (non résolu sans lire l'article).
+- Titre de The Block du 09/04/2026 : « plus bas de 14 mois » de l'« activité », ce qui renvoie à environ février 2025, alors que la 1re passe écrit « open interest au plus bas depuis février 2024 » : **contradiction confirmée, non résolue** ; les deux ne coïncident que si le titre et le corps de l'article parlent de mesures différentes (activité et open interest), à contrôler en lisant l'article.
 - Funding Binance ≈ 4,4 % APY (page ≈ 98 jours) : **confirmé** comme relevé daté d'environ début juillet 2026.
 - Funding BTC 0,0067 % par 8 h au 30/09/2026 : **non revérifié** ; relevés plus récents : 0,01 % par 8 h le 08/10 (MacroMicro, plateforme non identifiée) et ≈ 10,9 % annualisé sur Hyperliquid le 06/10 (defirate).
 - sUSDe 4,14 % au 28/07/2026 sur Aave, dépôts −9 % : **confirmé**.
@@ -188,7 +188,7 @@ Copy-trading : toujours une seule étude chiffrée, celle de YieldFund (vendeur,
 - Pour le copy-trading, la seule donnée reste celle d'un vendeur : un copieur a à peu près une chance sur deux d'être gagnant sur 90 jours, alors que près de 97 % des traders copiés le sont. Cet écart est cohérent avec le décalage d'exécution et les frais, mais ces causes sont des hypothèses non testées (1re passe). La différence entre plateformes (66,5 % contre 43,65 %), si elle était confirmée, montrerait que la moyenne cache de fortes disparités, mais son sens est ambigu.
 - Pour les prop firms, la définition change tout : 51,8 % chez Topstep (par trader, plusieurs tentatives) contre 14 % (FPFX, par compte) et 7 % de payés. Une « réussite » par trader sur plusieurs tentatives masque le coût cumulé des frais de challenge.
 - Les 115,1 M$ de paiements crypto du T1 2026 (+108,9 % sur un an, stagnants depuis décembre) montrent un flux réel mais sans dénominateur : sans le montant des frais encaissés par les firmes, on ne peut pas déduire un rendement pour le candidat moyen. Le biais de survie vient de ce que seuls les gagnants et les montants versés sont publiés.
-- Le rachat de Breakout par Kraken (septembre 2025) montre que les prop firms sont devenues un produit d'acquisition de clients pour les bourses ; le prix non divulgué empêche d'en tirer une valorisation.
+- Le rachat de Breakout par Kraken (septembre 2025), suivi de l'intégration à Kraken Pro puis du lancement de Kraken Prop, montre qu'une grande bourse a jugé utile de proposer elle-même du prop trading ; le prix non divulgué empêche d'en tirer une valorisation.
 
 ### Gaps
 - Aucune étude indépendante ni donnée de plateforme (Bitget, Binance, OKX, eToro) sur le rendement agrégé des copieurs, ni sur les faux classements de lead traders.
@@ -243,7 +243,7 @@ Alpha Arena, saison 1 (18/10-03/11/2025, 17 jours, 10 000 $ par modèle) : seuls
 - Du 18/10 au 03/11/2025 (17 jours), six modèles ont tradé des perpétuels crypto avec 10 000 $ chacun, de l'argent réel, sans intervention humaine, selon un message sur X publié vers le 04/11/2025 (date déduite de l'identifiant du message, [calcul personnel]). — [iWeaver, résultats saison 1](https://www.iweaver.ai/blog/alpha-arena-ai-trading-season-1-results/) ; [X (Harshith)](https://x.com/HarshithLucky3/status/1985623428918100145)
 - **Résultats rapportés :** Qwen3 Max +22,3 % (solde d'environ 12 231 $ selon une source, 12 287 $ selon une autre) ; DeepSeek V3.1 +4,89 %, seul autre gagnant ; Claude Sonnet 4.5 −30,8 % ; Grok 4 −45,3 % ; Gemini 2.5 Pro −56,7 % ; GPT-5 −62,7 %. — [GNCrypto News](https://www.gncrypto.news/news/qwen-wins-alpha-arena-season-1-with-22-percent-returns/) ; [ForkLog](https://forklog.com/en/four-out-of-six-ai-models-suffer-losses-in-trading-tournament/) ; [SCMP](https://www.scmp.com/tech/tech-trends/article/3331425/alibabas-ai-model-outperforms-us-rivals-crypto-trading-showdown) ; [iWeaver](https://www.iweaver.ai/blog/alpha-arena-ai-trading-season-1-results/)
 - **Désaccords entre sources :** un autre relevé donne Claude −42,01 % et GPT-5 −58,74 % (instantané différent) ; un billet Medium classe DeepSeek premier (12 287 $) devant Qwen (10 476 $), ce qui contredit la majorité des sources (instantané antérieur ? hypothèse non vérifiée). Le classement officiel de nof1.ai n'a pas pu être consulté. — [Medium](https://medium.com/@joe_62117/what-happens-when-you-let-ai-trade-your-investment-portfolio-895d5f51b6ee)
-- Selon Protos, ChatGPT, Gemini, Grok et Claude Sonnet ont fini sous les 10 000 $ de départ ; Nof1 a noté que le PnL était dominé par les coûts de trading lors des premières exécutions, les agents faisant trop de transactions. — [Protos](https://protos.com/llm-crypto-trading-contest-finds-llms-cant-trade-crypto/)
+- Dans l'extrait de recherche lié à l'article de Protos (attribution probable mais non certaine), ChatGPT, Gemini, Grok et Claude Sonnet ont fini sous les 10 000 $ de départ ; Nof1 aurait noté que le PnL était dominé par les coûts de trading lors des premières exécutions, les agents faisant trop de transactions. — [Protos](https://protos.com/llm-crypto-trading-contest-finds-llms-cant-trade-crypto/)
 - Moyenne équipondérée des six modèles : environ −28 % avec les chiffres ci-dessus, environ −29 % avec le second jeu de chiffres ([calcul personnel]).
 
 **Saison 1.5 et saison 2**
@@ -342,7 +342,7 @@ Cette passe confirme sans l'inverser la conclusion de la 1re passe : les preuves
 | VIRTUAL | ≈ 0,63 $ (≈ 414 M$) mi-juillet 2026 | Faible (guides) | [Ryder](https://ryder.id/blogs/post/ai-crypto-tokens-in-2026-what-fet-tao-and-render-do) |
 
 ### Inferences
-- **Qui gagne, d'après les deux passes :** les plateformes et teneurs de marché qui prélèvent des frais et des écarts (1re passe : 429 M$ de revenus pour Hyperliquid de janvier à mi-septembre 2026), les vendeurs d'outils et d'évaluations (frais de challenge des prop firms, abonnements de bots, copy-trading rémunéré) et une très petite queue de très gros comptes. Les particuliers perdent majoritairement (51 à 89 % selon la mesure), les fonds crypto professionnels sont négatifs en 2025 et 2026 à ce jour, et les agents IA ne montrent pas d'avantage durable.
+- **Qui gagne, d'après les deux passes :** les plateformes et teneurs de marché qui prélèvent des frais et des écarts (1re passe : 429 M$ de revenus pour Hyperliquid de janvier à mi-septembre 2026), les vendeurs d'outils et d'évaluations (frais de challenge des prop firms, abonnements de plateformes de bots : inférence de la 1re passe, sans chiffre de recettes publié) et une très petite queue de très gros comptes. Les particuliers perdent majoritairement (51 à 89 % selon la mesure), les fonds crypto professionnels sont négatifs en 2025 et 2026 à ce jour, et les agents IA ne montrent pas d'avantage durable.
 - **Biais de survie à rappeler partout :** classements de wallets (seuils élevés), lead traders et ROI de bots (seuls les meilleurs sont visibles), indices de fonds (déclaration volontaire), compétitions d'IA (une seule exécution, résultats publiés par l'organisateur), marketing des prop firms (seuls les paiements sont publiés).
 - **Portage delta-neutre :** à 3-5 % net sur la base CME et 4-5 % pour sUSDe, il rapporte à peine plus que les bons du Trésor ; le funding de 6 à 15 % brut début octobre est volatil et brut de tous coûts.
 
@@ -365,7 +365,7 @@ Cette passe confirme sans l'inverser la conclusion de la 1re passe : les preuves
 | Simulation 125x (98,32 %) | Confirmé | Simulation |
 | 1,8 Md$ le 02/06/2026 | Contradiction non résolue | Record S1 de CoinGlass : 31/01 (2,588 Md$) |
 | 1,19 Md$ les 8-9/10/2026 (CoinCentral) | Non vérifié | The Block : 555,6 M$ le 06/10 |
-| CME « plus bas depuis février 2024 » | Contradiction en faveur du titre (« 14 mois », soit février 2025) | Non résolu sans l'article |
+| CME « plus bas depuis février 2024 » | Contradiction non résolue | Le titre de The Block dit « 14 mois » (≈ février 2025) ; mesures peut-être différentes |
 | Base CME 3 % (CoinDesk) contre 5,69-7,89 % (CryptoSlate) | Confirmés comme deux mesures | Écart de méthode probable |
 | Funding 0,0067 % par 8 h au 30/09 | Non revérifié | Relevés ultérieurs : 0,01 % (08/10), 10,9 % annualisé sur Hyperliquid (06/10) |
 | Funding Binance ≈ 4,4 % APY | Confirmé comme relevé d'environ début juillet | Page d'environ 98 jours |
