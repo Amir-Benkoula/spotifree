@@ -46,3 +46,28 @@ Provisoire : le minage est rattaché aux BNC (BOFiP cité par des sources second
 
 ### Gaps
 - À compléter.
+
+---
+## [BROUILLON INTERMÉDIAIRE n°2 - après 15 recherches - à intégrer dans la version finale]
+
+### Q1 PFU - éléments nouveaux
+- impots.gouv.fr (page « Comment déclarer les plus ou moins values sur cessions d'actifs numériques », undated) : PFU 31,4 % (12,8 % + 18,6 %) quel que soit le nombre de transactions ; option barème expresse et irrévocable ; seuil 305 € (hors échanges sans soulte) ; moins-values imputables seulement sur plus-values de même nature de la même année, pas de report. URL: https://www.impots.gouv.fr/particulier/questions/comment-declarer-les-plus-ou-moins-values-sur-cessions-dactifs-numeriques (rapporté via résumé de recherche)
+- Légifrance art. 12 LFSS 2026 (loi 2025-1403 du 30/12/2025) : « le 2° du I [L.136-8 I 2°, 9,2 -> 10,6 %] s'applique à compter de l'imposition des revenus de l'année 2025 » ; nouveau IV maintient 9,2 % pour une liste d'exceptions. https://www.legifrance.gouv.fr/jorf/article_jo/JORFARTI000053226452 (extrait via résumé de recherche)
+- impots.gouv.fr (fiche prélèvements sociaux) : produits payés en 2025 -> 17,2 % ; CSG à 10,6 % à partir du 1er janvier 2026 pour produits de placement. CSG déductible reste 6,8 % (brochure IR 2026 nouveautés). https://www.impots.gouv.fr/www2/fichiers/documentation/brochure/ir_2026/pdf_som/nouveautes.pdf
+- Divergence persistante sur les plus-values mobilières 2025 (monpetitplacement.fr etc.).
+
+### Loi n° 2026-534 du 25 juin 2026 « relative à la lutte contre les fraudes sociales et fiscales » (art. 91)
+- Légifrance : https://www.legifrance.gouv.fr/jorf/article_jo/JORFARTI000054310089 ; Kohen : https://kohenavocats.com/obligations-declaratives-crypto-actifs-trusts-loi-2026-534-articles-150-vh-bis-ter-792-0-bis-1649-bis-c-1729-0-a-cgi-controle-2026/ ; CMS : https://cms.law/fr/fra/legal-updates/loi-fraudes-plusieurs-mesures-concernent-les-crypto-actifs ; Fiscalonline : https://fiscalonline.com/Innovation/fiscalite-crypto-actifs-apres-loi-25-juin-2026
+- 150 VH bis : référence à L.54-10-1 CMF remplacée par crypto-actifs MiCA ; nouvel art. 150 VH ter NFT (régime du sous-jacent) ; applicable aux cessions >= 1er janvier 2026 (II de l'art. 91) ; 1649 bis C étendu (MiCA + NFT détenus à l'étranger) ; 1729-0 A majoration 80 % étendue à tous actifs non déclarés ; entrée en vigueur 27 juin 2026 ; volet crypto non censuré par le CC.
+- Art. 3 quater (wallets > 5 000 €) écarté par la CMP du 28/04/2026.
+
+### PLF 2027
+- PLF n° 3210, déposé 1er oct. 2026 : pas de nouvel impôt sur cryptos dans le texte du gouvernement (rapporté orwl.fr / cryptoactu).
+- Commission des finances AN : rejet de la partie recettes le 9 oct. 2026 (31 voix contre 3, 2 abst.) ; amendements adoptés en commission tombent ; reprise en séance sur le texte initial à partir du 12 ou 13 oct. (sources divergent). 10 amendements crypto : 5 adoptés, 3 rejetés, 1 retiré, 1 irrecevable (JdC). Adoptés : Sansu I-CF1826 (conversion crypto->stablecoin imposable dès 1/1/2027, prix d'acquisition moyenne pondérée), exit tax crypto (I-CF1822, 800 000 € latents), Labaronne report moins-values 10 ans, de Courson wallets > 100 000 € (I-CF821). Eva Sas IFI élargi rejeté en commission le 7 oct.
+- IFIP 2025 : voté AN 31/10/2025, écarté du texte définitif.
+
+### Polymarket / ANJ
+- ANJ a ordonné le blocage de Polymarket le 16 juillet 2026 (société ADVENTURE ONE QSS INC.) ; promotion d'offre de jeux d'argent illégale (affichage des cotes) : https://anj.fr/promotion-dune-offre-de-jeux-dargent-illegale-blocage-du-site-polymarket ; CNews 17/07/2026 ; Cointelegraph FR ; 578 751 visites FR en juin 2026 (205 057 visiteurs uniques) ; enquête parquet de Paris ouverte 4 mai 2026 ; recours annoncé 22 juillet (La Planque du Joueur, non recoupé).
+
+### MiCA - plateformes (rapporté par cryptopulseinfo, ecoinomy tracker au 7 oct. 2026, hyrulea, cryptoast)
+- Coinbase Luxembourg S.A. (CSSF, notif. FR 20/06/2025) ; Kraken = Payward Europe Solutions Ltd (Central Bank of Ireland, notif. FR 25/06/2025) ; Bitpanda (BaFin ; un tableau cite FMA) notif. FR 21/02/2025 ; Bybit EU GmbH (FMA Autriche) ; Bitstamp (CSSF) ; OKX et Crypto.com (MFSA Malte) ; Gemini Intergalactic EU Ltd (MFSA Malte) ; Revolut Digital Assets (Europe) Ltd (CySEC Chypre) ; Binance, Bitget, BingX absents du registre ESMA au 7 oct. 2026 (tracker ecoinomy.eu).
