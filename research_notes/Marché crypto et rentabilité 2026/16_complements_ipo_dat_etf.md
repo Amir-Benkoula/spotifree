@@ -202,7 +202,7 @@ Au 9–10/10/2026, les ETF ETH américains pèsent 15,71 Md$ d'actifs et affiche
 ## 5. Accès depuis la France / l'UE : ETP européens, PEA, ETF américains (PRIIPs/DIC), actions américaines, allocations d'IPO, actions tokenisées
 
 ### Takeaway
-(à compléter après les dernières recherches)
+Pour un particulier en France, trois voies sont documentées par des sources secondaires (blogs et comparateurs, aucun texte de l'AMF ou de l'ESMA lu) : (1) les ETP/ETN crypto européens (21Shares CBTC, CoinShares BITC, Bitwise BTC1, iShares IB1T, Fidelity), sur compte-titres ordinaire, car aucun n'est éligible au PEA ; (2) les actions tokenisées (Kraken xStocks, Robinhood UE), qui ne donnent en principe pas de droit direct sur l'action ; (3) les actions américaines cotées via un courtier, voie non documentée par une source dans cette passe (voir Gaps). Les ETF américains (IBIT, etc.) ne sont en général pas ouverts aux particuliers de l'UE faute de DIC/KID au sens de PRIIPs. Aucune source trouvée sur l'accès d'un particulier français aux allocations d'IPO américaines.
 
 ### Cited Findings
 

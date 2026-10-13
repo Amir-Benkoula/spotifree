@@ -2,14 +2,25 @@
 
 > **Research conditions (read first).**
 > - This is a gap-filling pass after `08_rendement_passif_staking_defi.md` and `09_minage_validateurs_depin.md`. Those files were not edited.
-> - Tools: WebSearch only (budget 22 calls, shared quota). WebFetch and direct curl are unavailable. **Every figure below comes from WebSearch result summaries and result titles/URLs, not from reading full pages.** I attribute a figure to a page only when its title clearly matches; otherwise the line says "reported by <outlet>" or "attribution uncertain".
+> - Tools: WebSearch only (budget 22 calls, shared quota; all 22 were used). WebFetch and direct curl are unavailable. **Every figure below comes from WebSearch result summaries and result titles/URLs, not from reading full pages.** I attribute a figure to a page only when its title clearly matches; otherwise the line says "reported by <outlet>" or "attribution uncertain".
 > - Every figure carries a date. Anything older than ~3 months is labelled "historical context".
 > - Section 10 states, for each first-pass lead I checked, whether it is **confirmed / corrected / not verified**.
+
+> **Headline findings (details and sources in the sections below).**
+> - **Staking:** Lido stETH paid 2.19% (27 Sep) and 2.23% (~6 Oct 2026); the network-wide ETH reward was 2.64% in late July. Other PoS rates (SOL ~4.9–6.1%, ATOM ~19.7%, AVAX ~5.5%, TRX ~3.3%, HYPE ~2.2%, ADA ~2.1%, SUI ~1.5%) exist only as undated snapshots.
+> - **EU/MiCA:** Coinbase ended USDC rewards for EEA customers on 1 Dec 2024 and no 2026 reinstatement was found; USDT and USDe are not MiCA-authorised; Binance's and Bybit's EU status after 1 Jul 2026 is disputed in the sources.
+> - **Restaking:** on 27 Sep 2026 liquid restaking tokens paid a base rate of 2.16–2.29% against 2.19% for stETH, so the base premium over plain staking was about zero; Kelp DAO lost about $292M on 18 Apr 2026 through a bridge-verification failure.
+> - **Incidents:** MetaMask exited a reported ~17,000 validators after an infrastructure incident (30 Sep–1 Oct), pushing the Ethereum exit queue to 786,275 ETH (13 d 16 h) on 5 Oct; CertiK counts $1.26B of hack losses in Q3 2026 (Bitget $387.5M, Liquid Network ~$320M).
+> - **Tokenized Treasuries:** about $14.9B (rwa.xyz via PANews, mid-Oct 2026); BUIDL about $2.20B, USYC $2.38B, USDY $2.33B.
+> - **Validators:** Ethereum entry queue ~1.46M ETH (~25 days); Solana's Alpenglow consensus is scheduled for 21 Oct 2026 and was not live on 13 Oct; Solana vote costs are about 1 SOL a day today.
+> - **DePIN:** Messari's latest report is State of DePIN 2025 (about $72M on-chain revenue in 2025, over $100M expected in 2026); per-device earnings are small and mostly blog-reported.
+> - **Scam warnings:** no 2025–2026 AMF, FCA, SEC or FBI alert on cloud mining or mining apps was found; older official alerts and the standard red flags are listed in section 8.
+> - **Benchmarks** (T-bill 4.15%, ECB 2.50%, Livret A 1.7%) are carried over from the first pass and were not re-verified.
 
 ## 1. Current staking yields (Sept–Oct 2026): ETH (stETH, rETH), SOL (native, JitoSOL), ATOM, DOT, ADA, AVAX, TRX, SUI, HYPE
 
 ### Takeaway
-**Only ETH has a dated Sept/Oct 2026 reading**: Lido stETH about **2.2%** (2.19% on 27 Sep and 2.23% around 6 Oct). For the other assets the only rates retrievable are **"live" snapshots of Staking Rewards pages cached at unknown dates (some more than a year old)**, so they give an order of magnitude only: **SOL ~4.9–6.1% (mSOL 5.95%), ATOM ~19.7%, AVAX ~5.5% (sAVAX 4.9%), TRX ~3.3%, HYPE ~2.2%, ADA ~2.1%, SUI ~1.5%**. DOT was not retrieved (stale guides say 7–15%). **rETH and JitoSOL have no 2026 reading.** Every one of these rewards is paid in the staked token, so none is comparable to a 4.15% T-bill or the 1.7% Livret A without taking the token's price risk. <<S1_TAKE_MORE>>
+**Only ETH has a dated Sept/Oct 2026 reading**: Lido stETH about **2.2%** (2.19% on 27 Sep and 2.23% around 6 Oct). For the other assets the only rates retrievable are **"live" snapshots of Staking Rewards pages cached at unknown dates (some more than a year old)**, so they give an order of magnitude only: **SOL ~4.9–6.1% (mSOL 5.95%), ATOM ~19.7%, AVAX ~5.5% (sAVAX 4.9%), TRX ~3.3%, HYPE ~2.2%, ADA ~2.1%, SUI ~1.5%**. DOT was not retrieved (stale guides say 7–15%). **rETH and JitoSOL have no 2026 reading.** Every one of these rewards is paid in the staked token, so none is comparable to a 4.15% T-bill or the 1.7% Livret A without taking the token's price risk. ETH rewards slipped from 2.64% (~23 Jul) to 2.19–2.23% (27 Sep–6 Oct).
 
 ### Cited Findings
 #### Ethereum (stETH, rETH)
@@ -248,8 +259,126 @@ Tokenized US Treasuries stand at **about $14.9B** (rwa.xyz data as reported by P
 
 
 
-<<S8>>
+## 8. Cloud-mining and "mining app" scam warnings (2025–2026): AMF, FCA, SEC, CFTC, FBI
 
-<<S9>>
+### Takeaway
+**No 2025–2026 warning from the AMF, FCA, SEC or FBI specifically about cloud mining or mining apps was found.** Two searches (one restricted to official domains) surfaced only older official material: a 2022 FBI IC3 alert on fraudulent "liquidity mining" apps that drain wallets, SEC/CFTC investor alerts on fraudulent digital-asset websites (2019 version), SEC "unregistered soliciting entity" alerts on two cloud-mining sites and an FCA warning on one (dates not captured), and an archived DOJ press release on a purported mining platform. **No AMF page surfaced.** The official red flags are consistent: guaranteed or "risk-free" returns, "mining farm" claims, and withdrawal fees disguised as taxes. The hashprice arithmetic from the first pass gives an objective ceiling against which to test any offer.
 
-<<S10>>
+### Cited Findings
+- **FBI IC3 (PSA of 21 Jul 2022, historical):** scammers get victims to link their crypto wallet to a **fraudulent "liquidity mining" application**, after which the funds are wiped out; victims are asked to report at ic3.gov. A secondary guide says IC3 tied such scams to over $70M of victim losses since Jan 2019 (secondary; the figure was not visible in the official snippet). — [FBI IC3, PSA220721](https://www.ic3.gov/PSA/2022/PSA220721)
+- **SEC and CFTC investor alerts (standing guidance; the CFTC/SEC joint alert PDF dates from 2019):** scams often promise "risk-free", "zero risk", "absolutely safe" or "guaranteed" profit; fraudsters claim to invest customers' funds in proprietary crypto trading systems **or in "mining" farms**; victims are asked to pay extra costs, such as purported taxes, to withdraw fake profits. — [Investor.gov](https://www.investor.gov/introduction-investing/general-resources/news-alerts/alerts-bulletins/investor-alerts/investor-alert-watch-out-fraudulent-digital-asset-and-crypto-trading-websites); [CFTC](https://www.cftc.gov/LearnAndProtect/AdvisoriesAndArticles/watch_out_for_digital_fraud.html); [CFTC press release 7917-19](https://www.cftc.gov/PressRoom/PressReleases/7917-19); [SEC OIEA, Digital Asset and "Crypto" Investment Scams](https://www.sec.gov/oiea/investor-alerts-and-bulletins/digital-asset-and-crypto-investment-scams-investor-alert)
+- **Entities named on official lists (dates and exact wording not captured; I did not read the pages):** the SEC's "Public Alerts: Unregistered Soliciting Entities" has pages for two cloud-mining names, and the FCA's warning list has a page for a third; the FCA entry says the firm is not authorised or registered by the FCA (per the search summary). If the final report names any of them, it should quote the official wording and date from the page itself. — [SEC alert page 1](https://www.sec.gov/enforcement-litigation/public-alerts-unregistered-soliciting-entities/cloudinmine); [SEC alert page 2](https://www.sec.gov/enforcement-litigation/public-alerts-unregistered-soliciting-entities/crypto-mining-masters); [FCA warning page](https://www.fca.org.uk/news/warnings/cloud-mining-city)
+- **DOJ (archived release, date not captured):** the CEO of a purported mining company was **indicted** over an alleged $62M global investment fraud in which, according to the indictment, funds were diverted to cryptocurrency wallets under his control rather than used for mining. An indictment is an allegation, not a conviction. — [DOJ archives](https://www.justice.gov/archives/opa/pr/ceo-mining-capital-coin-indicted-62-million-cryptocurrency-fraud-scheme)
+- **Secondary sources (vendor and scam-watch blogs, several selling hardware or exchange services; loss figures conflict):** they cite fake cloud-mining operations, say the SEC treats "passive income" mining contracts as securities because investors rely on the operator's efforts, and say the CFTC documented mining-farm scams promising 20–50% guaranteed returns. Typical red flags listed: guaranteed daily returns, anonymous operators and unverifiable hardware, withdrawal fees labelled as tax or activation charges, and recovery scams aimed at earlier victims. — [ChainUp](https://chainup.com/blog/cloud-mining-scams-how-to-avoid/); [BingX Learn](https://bingx.com/en/learn/article/what-are-the-top-bitcoin-mining-scams); [D-Central](https://d-central.tech/avoid-cloud-mining-scams/); [CoinLaw](https://coinlaw.io/how-cloud-mining-works/)
+- **Reference for an objective test (from first-pass file 09):** hashprice about **$40 per PH/s per day** in early October 2026 and a record low monthly average of **$27.7** in June 2026 (CoinShares). — [hoge.gg, early Oct 2026](https://hoge.gg/hashprice-2026-difficulty-ceiling-miner-recovery/); [CoinShares Q2 2026](https://coinshares.com/corp/insights/research-data/bitcoin-mining-report-q2-2026/)
+
+### Inferences
+- **Ceiling test (CALCUL, from first-pass figures):** at ~$40/PH/day, a 100 TH/s contract (0.1 PH/s) earns about **$4 a day gross**, before electricity and the operator's fee. The first-pass payback calculation for an industrial operator paying $0.04/kWh with a top machine gives a simple payback of **0.84 to 2.28 years**, which is **about 0.12% to 0.33% of the capital outlay per day** (1 ÷ (365 × payback)). An offer promising 1% a day or more, or a fixed daily return unrelated to hashprice and difficulty, beats the best-placed industrial miner by a factor of roughly 3 to 8 and is mathematically suspect.
+- **Mining pays less, not more, in 2026:** listed miners were below their cash breakeven in aggregate in Q2 2026 (first pass), so a retail "mining app" promising stable high yields contradicts the sector's own economics.
+- The official alerts found are old (2019–2022), so the absence of a 2025–2026 hit reflects what the search surfaced and not proof that regulators have not warned recently.
+
+### Gaps
+- AMF/ACPR: no cloud-mining or mining-app warning, and no blacklist entry, surfaced; blacklist pages must be checked on amf-france.org directly.
+- 2025–2026 FBI/IC3, SEC, CFTC, FCA, FTC or ESMA/FSMA/FINMA alerts about cloud mining or "mining apps" (including app-store apps and impersonation of ASIC makers): not found. The FBI's 2025 IC3 annual report (published in 2026) was not retrieved.
+- Dates and exact wording of the SEC, FCA and DOJ pages above were not captured.
+
+
+
+## 9. Consolidated dated table: current yields and participant earnings (as of 13 Oct 2026)
+
+### Takeaway
+Against a French saver's risk-free options (**Livret A 1.7% tax-free, ECB deposit rate 2.50%, US 3-month T-bill 4.15%**), the retrievable passive yields fall into three groups. **(1) At or below the T-bill:** Aave USDC ~3.6%, Sky SSR 3.8%, tokenized T-bill funds ~3.5%, PT-sUSDe ~4.2% fixed (Aug). **(2) A little above it, with tail risk:** sUSDe ~4.8% (first pass). **(3) Paid in volatile tokens:** ETH staking ~2.2%, SOL ~5–6% (undated), ATOM ~19.7% (undated, inflation-driven), restaking about the same as plain stETH. On MiCA-authorised EU platforms stablecoin interest is largely unavailable (Coinbase EEA ended it in Dec 2024). DePIN participants earn cents to tens of dollars a month per device, on a sector that booked about $72M of on-chain revenue in 2025.
+
+Confidence codes: **A1** = dated Sept/Oct 2026 reading found in this pass; **A2** = dated Sept/Oct 2026 reading from the first pass, re-listed and not re-verified; **B** = dated July–August 2026; **C** = undated snapshot; **D** = historical (older than ~3 months), promotional or third-party estimate; **CALC** = my calculation from sourced inputs.
+
+### Cited Findings
+| Item | Rate or earnings | Date | Where the yield comes from | Main risks | Conf. | Source |
+|---|---|---|---|---|---|---|
+| **Benchmark:** Livret A (LDDS 1.7%, LEP 2.5%) | 1.7%, tax-free | from 1 Aug 2026 | State-regulated rate (Banque de France proposal) | no capital risk; rate reset each Feb and Aug | A2 | [Ministère de l'Économie](https://presse.economie.gouv.fr/?p=181486) |
+| **Benchmark:** ECB deposit facility rate | 2.50% | from 16 Sep 2026 | ECB policy rate | none for deposits; next meeting 29 Oct | A2 | [ECB data portal](https://data.ecb.europa.eu/key-figures/ecb-interest-rates-and-exchange-rates/key-ecb-interest-rates) |
+| **Benchmark:** US 3-month T-bill | 4.15% (4.23% on 8 Oct) | 13 Oct 2026 | US Treasury | EUR/USD risk for a euro saver | A2 | [Trading Economics](https://tradingeconomics.com/united-states/3-month-bill-yield) |
+| Lido stETH | 2.19% (27 Sep); 2.23% (~6 Oct) | Sep–Oct 2026 | ETH protocol rewards, net of Lido's 10% fee | ETH price; contract and operator risk (MetaMask validators exited); depeg; exit queue 13 d 16 h on 5 Oct | A1 | [KuCoin flash](https://www.kucoin.com/news/flash/lido-metamask-staking-validator-exit-near-completion-steth-apr-at-2-23); [Upshift](https://www.upshift.finance/blog/what-is-restaking) |
+| ETH network staking reward | 2.64% | ~23 Jul 2026 | Protocol issuance and fees | ETH price | B | [CryptoRank](https://cryptorank.io/news/feed/0cee6-ethereum-validator-exit-queue-vanishes-while-2-48m-eth-waits-to-enter-staking) |
+| Solo ETH validator, 32 ETH (assumed) | about 0.7–0.85 ETH a year | Oct 2026 | Protocol rewards | slashing, uptime and hardware; ~25-day entry queue; ETH price | CALC | section 6 |
+| Liquid restaking tokens (ETH) | base 2.16–2.29%, plus variable AVS rewards | 27 Sep 2026 | Base staking plus AVS incentives | bridge or verifier exploit (Kelp, $292M, 18 Apr); slashing; depeg; token-paid rewards | A1 | [Upshift](https://www.upshift.finance/blog/what-is-restaking); [OpenZeppelin](https://www.openzeppelin.com/news/lessons-from-kelpdao-hack) |
+| SOL native staking | about 4.9–6.1% | undated | Inflation, fees, MEV tips | SOL price; validator commission; short unbonding | C | [Staking Rewards](https://www.stakingrewards.com/asset/solana) |
+| mSOL / JitoSOL | mSOL 5.95% (undated); JitoSOL no 2026 reading (7.9–8.5% in early-2026 guides) | undated / Jan 2026 | Staking plus MEV | LST depeg, contract risk | C / D | [Staking Rewards](https://www.stakingrewards.com/asset/msol); [StakePoint](https://stakepoint.app/blog/solana-staking-rates-january-2026) |
+| ATOM staking | about 19.7% | undated | Token inflation | 21-day unbonding; dilution; price | C | [Staking Rewards](https://www.stakingrewards.com/asset/cosmos) |
+| AVAX (sAVAX) | about 5.5% (4.9%) | undated | Inflation and fees | lock-up 14 days to 1 year | C | [Staking Rewards](https://www.stakingrewards.com/asset/avalanche) |
+| TRX, HYPE, ADA, SUI | 3.3%, 2.2%, 2.1%, 1.5% | undated | Protocol issuance | token price | C | [TRX](https://www.stakingrewards.com/asset/tron); [HYPE](https://www.stakingrewards.com/asset/hyperliquid); [ADA](https://www.stakingrewards.com/asset/cardano); [SUI](https://www.stakingrewards.com/asset/sui) |
+| DOT staking | not retrieved (stale guides 7–15%) | n/a | n/a | n/a | D | [Spotedcrypto](https://www.spotedcrypto.com/crypto-staking-guide-2026-apy-comparison/) |
+| Aave v3 USDC, Ethereum | about 3.58% (USDT about 3.75%) | 28 Sep 2026 | Borrower interest minus reserve factor | variable rate; contract risk; run risk after Kelp | A2 | [Stablecoin Insider](https://stablecoininsider.org/earn-stablecoin-yield-with-aave/) |
+| Sky sUSDS (SSR) | 3.80% (from 3.60%) | 7 Oct 2026 | Governance-set rate | governance; contract; single secondary report | A2 | [Coinfomania](https://coinfomania.com/sky-savings-rate-rises-to-3-80-enhancing-susds-capital/) |
+| Ethena sUSDe | about 4.76% | 28 Sep 2026 | Funding and basis income, lending; ENA incentives ended 30 Sep | negative funding; venue depeg; custody | A2 | [Stablecoin Insider](https://stablecoininsider.org/ethenas-staked-usde-stablecoin/) |
+| Pendle PT-sUSDe | about 4.2% fixed; about 3.5% implied across pools | Aug 2026 | Fixed discount on sUSDe | underlying sUSDe risk; Pendle TVL $1.24B (15 Sep) | B | [Coinpaprika](https://coinpaprika.com/education/pendle-finance-rwa-yield/) |
+| Tokenized T-bill funds | 3.50% (7-day average); market about $14.9B (BUIDL 2.20, USYC 2.38, USDY 2.33) | Sep and mid-Oct 2026 | US T-bills and repo, minus fees | issuer, custody, contract and access risk | A2 (yield) / A1 (size) | [Stablecoin Insider](https://stablecoininsider.org/top-10-tokenized-treasury-funds-in-2026-buidl-benji-and-the-highest-yielding-on-chain-options/); [PANews](https://panews.io/articles/01a13635-70e3-74fc-b605-dc6f7b61e54f) |
+| Morpho / Spark USDC | not verified for Sep–Oct (snapshots: Morpho 4–8%, vault-dependent; Spark 3.9–4.7%) | Mar–Jun 2026 | Lending; Sky-linked rates for Spark | curator risk (Morpho); contract risk | D | [Eco](https://eco.com/support/en/articles/15253991-best-usdc-yield-platforms-2026-aave-morpho-sky-compared); [Spark.money](https://www.spark.money/tools/defi-lending-rate-comparison) |
+| Coinbase USDC rewards, EEA | none since 1 Dec 2024 (was 4.35–4.7%) | Dec 2024 | n/a | MiCA Article 50 | D | [Finance Magnates](https://www.financemagnates.com/cryptocurrency/coinbase-cuts-ties-with-usdc-rewards-in-eea-over-mica-rules/) |
+| Kraken USDC rewards | 1.75% standard; 3.75% with Kraken+ ($4.99 a month) | Apr 2026 | Platform programme | EU eligibility unverified; CeFi counterparty | D | [Kraken](https://www.kraken.com/learn/stablecoin-yield-vs-hysa) |
+| Bitpanda lending (USDC, EURCV) | up to 7% (3% base plus discretionary bonus) | 2026, undated review | Platform programme | outside MiCA per review; 14-day redemption; counterparty | D | [Datawallet](https://www.datawallet.com/crypto/bitpanda-review) |
+| OKX EEA USDC promotion | 8% bonus on net deposits, up to €20,000; ended 31 Jul 2026 | Jul 2026 | Marketing bonus | one-off | D | [OKX](https://www.okx.com/en-us/learn/rewardmaxxing-okx-stack-rewards) |
+| Ethereum entry / exit queue | entry about 1.46M ETH (about 25 d); exit 786,275 ETH (13 d 16 h) | 5 Oct 2026 | n/a | MetaMask-driven exit surge | A1 | [KuCoin flash](https://www.kucoin.com/news/flash/ethereum-staking-exit-queue-hits-786-275-eth-longest-of-2026); [Crypto Economy](https://crypto-economy.com/ethereum-staking-exit-queue-hits-two-weeks/) |
+| Solana validator costs | vote cost about 1 SOL a day now; admission fee after Alpenglow (21 Oct); break-even stake 4,850 to about 450 SOL (secondary) | Oct 2026 | n/a | fee units unresolved; schedule risk | A1 / C | [Solana](https://solana.com/upgrades/alpenglow); [Solana Compass](https://solanacompass.com/news/what-solanas-alpenglow-upgrade-changes-validator-costs-finality-and-96-fast-path-finalization-from-the-test-cluster) |
+| Helium home hotspot | about $0.05–5 a month | 2026 guides | HNT rewards; carrier offload | HNT price (−77% in 2025); coverage and demand | D | [DePINwireless](https://depinwireless.com/2026/02/06/helium-hotspot-earnings-2026-maximizing-profits-in-depin-wifi-and-5g-networks/) |
+| Helium protocol revenue | $15.6M annualised | Q1 2026 run-rate | Carrier offload, data credits | definition conflicts with a $24M-a-month claim | D | [Deep Waters Capital](https://deepwaters.capital/tpost/dplb4sbp91-helium-hnt-valuation-report-part-1) |
+| io.net | about $12.5M annualised (DePINpulse via review); $12.11M projected ARR (company); $110–220 a month per GPU card (unverified) | Mar–May 2026 | GPU rental | self-reported revenue; utilisation | D | [OwnYourMind](https://ownyourmind.ai/projects/io-net/); [io.net on X](https://x.com/ionet/status/2079209965487632448) |
+| Grass | $5–20 a month per device (user-reported); revenue $17M (company-provided) | 2025–H1 2026 | Bandwidth and data sales | token price; unclear periods | D | [JackHackMoney](https://jackhackmoney.com/grass-io-depin-guide-2026/); [CryptoRank](https://cryptorank.io/insights/deals/grass-undisclosed-2026-09-29) |
+| Bee Maps contributor | single-digit to low double-digit dollars a month | 2026 | HONEY rewards | HONEY price; device cost ($589 upfront or $19 a month, as reported) | D | [OneShekel](https://oneshekel.com/how-much-does-a-hivemapper-dashcam-actually-make-per-month-real-data-2026/) |
+| GEODNET station | about $1.8 a day (estimate); 22,734 devices | about early 2025 | GEOD rewards, RTK data sales | GEOD price (−41% in 2025) | D | [DePIN Scan](https://depinscan.io/projects/geodnet) |
+| Render node | no per-node figure published | n/a | n/a | n/a | n/a | [BEX](https://bex.co/blog/2026/04/12/depin-revenue-pivot-token-subsidies-ai-compute-akash-render-ionet) |
+| DePIN sector | $72M on-chain revenue in 2025; over $100M expected in 2026 (forecast) | Jan 2026 | n/a | forecast, not measured | D | [Cointelegraph](https://cointelegraph.com/news/depin-revenues-grow-despite-token-losses) |
+
+### Inferences
+- **No dated Sept/Oct 2026 USD yield found here clears the 4.15% T-bill by more than about 0.6 pp** (sUSDe, first pass). Aave USDC, Sky SSR and tokenized T-bill funds sit 0.35–0.65 pp below it; PT-sUSDe's August fixed rate roughly equals it. Anything shown well above that (Morpho 4–8% in older snapshots, Bitpanda "up to 7%", ATOM ~19.7%) is either vault- or platform-specific, promotional, or inflation-driven, and carries more risk.
+- **For a euro-based saver the hurdle is lower than the T-bill:** Livret A 1.7% tax-free and the ECB deposit rate 2.50%. ETH staking at ~2.2% in ETH is below that ECB rate in nominal terms and carries full ETH price risk. A USD stablecoin yield compared with those euro hurdles also depends on EUR/USD (see first-pass file 08, section 7).
+- **EU access narrows the menu:** stablecoin interest is largely absent from MiCA-authorised venues (Coinbase EEA), USDT and USDe are not MiCA-authorised, and the 1 Jul 2026 end of the MiCA transition left some platforms' EU status disputed. A French saver's practical options are therefore mostly on-chain (self-custody) or non-MiCA products, each with its own risk.
+- **2026 loss events cluster in the same products that offer extra yield:** Kelp/rsETH ($292M, restaking), Bitget ($387.5M, a CeFi venue), Liquid Network (~$320M), MetaMask's validator incident (operational). Premiums of 0 to 0.6 pp over the T-bill are small relative to these tail events.
+
+### Gaps
+- Dated Sept/Oct 2026 rates for SOL, JitoSOL, rETH, DOT and the other PoS assets; Morpho and Spark USDC; Pendle implied APYs; EU-specific CeFi rates; DePIN per-device earnings from primary data; benchmarks re-verified: see sections 1–7.
+
+
+
+## 10. Status of first-pass leads checked in this pass (confirmed / corrected / not verified)
+
+### Takeaway
+Of the first-pass items I could test, **stETH 2.23%, the $14.9B tokenized-Treasury market and the ~1 SOL/day Solana vote cost were confirmed**; **the Kelp DAO loss (~$292M rather than $293M) and Circle USYC's size (about $2.4–2.5B rather than about $3B) were corrected**; the MetaMask incident, Q3 hack totals, Coinbase's EU position, restaking yields, Alpenglow's date and the DePIN backdrop were **filled in**; AMF-level scam warnings and several DePIN and Solana details **remain unverified**. The benchmark rates (T-bill, ECB, Livret A) were **not re-verified**.
+
+### Cited Findings
+| First-pass lead (file) | Status | Evidence in this pass |
+|---|---|---|
+| Kelp DAO exploit "$293M, 18 Apr 2026"; Kelp as rsETH issuer (08) | **Corrected / confirmed** | About $292M per CoinDesk and OpenZeppelin ($293M on one site); rsETH is Kelp's restaking token; mechanism and Aave bad-debt scenarios now sourced (section 4) |
+| "$15B withdrawn from Aave in four days after Kelp" (08) | Not re-checked | Only headlines on Aave bad-debt scenarios ($124M–$230M) seen |
+| MetaMask staking "security incident", nature/date/loss unknown (08) | **Partly closed** | 30 Sep–1 Oct 2026; infrastructure compromise with undisclosed cause; about 0.36 ETH of diverted rewards; about 17,000 validators and 523,000 ETH (unconfirmed) |
+| Lido stETH 2.23% around 6 Oct (08) | **Confirmed** | 2.19% on 27 Sep (DefiLlama via a guide); no other October reading |
+| Tokenized Treasuries $14.93B across 108 products, Sept (08) | **Confirmed** | rwa.xyz 23 Sep via Upshift: $14.93B, 108 products; about $14.91B mid-Oct via PANews |
+| BUIDL about $2.37B in June (08) | **Updated** | About $2.23B on 23 Sep and $2.204B mid-Oct |
+| Circle USYC about $3B, largest fund by mid-2026 (08) | **Corrected** | USYC $2.51B on 23 Sep and $2.384B mid-Oct; a "$3B" USYC figure appears only in a MetaMask explainer |
+| Tokenized Treasuries about $16.16B in July (08) | Not re-checked | October total is lower, about $14.9B |
+| Aave USDC about 3.58%, Sky SSR 3.8%, sUSDe about 4.76% (08) | Not re-verified | No newer dated reading found; Morpho and Spark still unverified (only Mar–Jun snapshots) |
+| sUSDe 9.4% (Apr) and 7.1% (Jun) (08) | **Re-found** | Same figures in an Ethena guide, undated in its own text |
+| Pendle, no 2026 data (08) | **Partly filled** | PT-sUSDe about 4.2% fixed and 3.5% implied in Aug 2026; TVL about $1.24B on 15 Sep; Sep–Oct implied APYs still missing |
+| Restaking realised rewards, only Kelp (08) | **Filled** | LRT base 2.16–2.29% vs stETH 2.19% on 27 Sep; EigenLayer $7.06B; slashing go-live date conflicts (2025 vs 2026) |
+| SOL and other PoS yields not covered (08) | **Partly filled** | Undated Staking Rewards snapshots only; no dated Sept/Oct readings except ETH |
+| Q3 2026 hack totals not collected (08) | **Filled** | CertiK $1.26B, 247 incidents; PeckShield about $1.14B (weaker outlet); no Immunefi or Chainalysis figure |
+| Coinbase USDC rewards and CeFi earn not collected (08) | **Filled in part** | Coinbase EEA ended 1 Dec 2024; Kraken, Bitpanda, OKX figures are third-party or promotional (section 2) |
+| MiCA background: stablecoin rules, USDT restricted for EU users (08) | **Confirmed in substance** | USDT and USDe not MiCA-authorised; Binance EEA restriction 31 Mar 2025; 1 Jul 2026 end of transition. The "mid-2024 / end-2024" application dates were not re-checked |
+| Benchmarks: T-bill 4.15%, ECB 2.50%, Livret A 1.7% (08) | **Not re-verified** | Carried over unchanged |
+| Solo staking: 32 ETH minimum, Pectra EIP-7251, about 3% APR in 2025, permissionless modules (09) | **Not verified** | 32 ETH used only as a flagged assumption; 2026 reward is about 2.2–2.6%, not 3% |
+| Solana vote costs about 1 SOL/day (09) | **Confirmed** | Official page and secondary sources |
+| Alpenglow (SIMD-0326) and the admission ticket (09) | **Confirmed in substance, date now known** | VAT is SIMD-0357 and the BLS gate SIMD-0387 (both live in July 2026); consensus switch scheduled 21 Oct 2026, so not active on 13 Oct; SIMD-0326 itself, SIMD-0123 and SIMD-0228 not re-checked |
+| Solana break-even stake (09) | **Secondary figure only** | 4,850 SOL falling to about 450 SOL; VAT units conflict |
+| Messari "State of DePIN" 2026 edition (09) | **Not found** | Latest is State of DePIN 2025, published January 2026 |
+| Helium: 2025 emission halving, MOBILE/IOT conversion, hotspot earnings (09) | **Halving and conversion not verified** | Hotspot earnings about $0.05–5 a month; Helium Mobile 461,500 signups at 30 Sep 2025; reported sale to Noble Mobile only on Wikipedia |
+| Hivemapper renamed Bee Maps, new Bee device (09) | **Confirmed** | CoinDesk and PR Newswire, Oct 2025 |
+| Render, io.net, Grass, Geodnet, Natix earnings (09) | **Partly filled** | io.net, Grass revenue figures (company or self-reported); Render none credible; Geodnet early-2025 only; Natix not found |
+| AMF blacklists and FCA, SEC, CFTC, FBI cloud-mining alerts, 2025–2026 (09) | **Not found for 2025–2026** | Older official alerts only (2019–2022 or undated); no AMF page surfaced (section 8) |
+| Other 09 leads: Monero/Qubic, Kaspa, LTC/DOGE, GPU mining, MARA–Exaion, Hut 8, Core Scientific–CoreWeave (09) | **Out of scope, not checked** | n/a |
+
+### Inferences
+- The corrections are small in size terms (Kelp $1M rounding; USYC about $0.6B lower) but matter for any sentence that ranks tokenized-Treasury funds.
+
+### Gaps
+- All items marked "Not re-checked", "Not verified" or "Out of scope" remain open for the report writer to treat as unverified.
+
+
