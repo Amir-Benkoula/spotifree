@@ -239,21 +239,58 @@ Pour un particulier en France, trois voies sont documentées par des sources sec
 (à compléter)
 
 ### Inferences
-(à compléter)
+- La voie « ETP européen » est la seule à la fois documentée et ouverte à un particulier pour s'exposer au BTC par un titre coté, mais elle se loge en compte-titres ordinaire (pas de PEA) et il s'agit de titres de créance : les frais (de 0,05 % à 0,25 % selon les sites et les produits) et le risque de l'émetteur/du dépositaire sont à lire dans le prospectus de chaque ETP (non vérifié ici).
+- Les actions tokenisées ne sont pas équivalentes à détenir l'action : droits limités, cadre juridique différent (prospectus du Liechtenstein pour xStocks ; entité lituanienne pour Robinhood). Elles élargissent l'accès (par exemple à CRCL ou COIN), mais le risque juridique s'ajoute au risque de marché.
+- Les gagnants des IPO crypto (§1) étaient des allocataires institutionnels ; rien dans les sources collectées n'indique qu'un particulier français puisse obtenir une allocation. Hypothèse prudente : s'exposer après la cotation, à des cours qui ont baissé de 12 % à 84 % sous le prix d'IPO pour quatre des six titres suivis (§1).
 
 ### Gaps
-(à compléter)
+- Aucune source primaire (AMF, ESMA, MiCA, textes PRIIPs) ; classification des ETP crypto en « produits complexes » (MiFID II), test d'adéquation et position de l'AMF : non trouvés.
+- Accès d'un résident français aux actions américaines (courtiers, formulaire W-8BEN, inéligibilité au PEA) et aux allocations d'IPO américaines (Robinhood IPO Access, Freedom24, etc.) : **aucune source dans les deux passes** ; ces points restent de la mémoire du modèle (non sourcée) et ne doivent pas être présentés comme des faits vérifiés.
+- Exemption de la SEC pour les actions tokenisées (mi-septembre 2026, passe 1) et sa portée pour l'UE : non revérifiée. Position de Bitpanda et de Gemini sur les actions tokenisées : non trouvée.
+- Dates de lancement d'IB1T, du Fidelity Physical Bitcoin ETP et de l'ETP d'Amundi (source unique) : non vérifiées. Frais (TER) contradictoires selon les sites.
+- Le taux de 31,4 % du prélèvement forfaitaire depuis le 01/01/2026 (Finary) contre 30 % (autre site) n'est pas tranché ; la fiscalité est hors périmètre de cette note.
 
 ## 6. Actions crypto depuis le début de 2026 : COIN, HOOD, CRCL, MSTR, GLXY et mineurs
 
 ### Takeaway
-(à compléter)
+Depuis le début de 2026, les actions de minage reconverties dans l'IA et le calcul haute performance ont fait mieux que le bitcoin (Riot et MARA en hausse de 47 % et 30 % selon un relevé non daté, Riot jusqu'à ≈ +90 % selon un autre), mais ce sont devenues des paris sur l'IA. Parmi les actions « purement crypto », Circle a été la meilleure en début d'année (+30 % en avril, +68 % en mai) avant de retomber à 81,49 $ le 13/10/2026 (–45 % sous son plus haut sur 52 semaines). Coinbase, Galaxy et Strategy cotent ≈ 52 à 57 % sous leurs plus hauts sur 52 semaines ; Coinbase est à environ –20 % depuis le début de 2026 (calcul de la passe 1, corroboré par –10 % en avril et –17,7 % mi-septembre). Le bitcoin lui-même était à –10 % depuis le début de l'année en avril et vaut ≈ 83 400 $ le 13/10/2026.
 
 ### Cited Findings
-(à compléter)
+
+**Plateformes, émetteurs et DAT (cours de la passe 1 sauf mention)**
+- Circle (CRCL) : +30 % depuis le début de 2026 en avril, meilleure action liée à la crypto à cette date, alors que Coinbase décrochait — [The Block, « Circle tops crypto stocks with 30% gain as stablecoin growth outpaces Coinbase slump »](https://www.theblock.co/post/398141/circle-tops-crypto-stocks-with-30-gain-as-stablecoin-growth-outpaces-coinbase-slump) (date précise non relevée) ; +68 % depuis le début de 2026 après les résultats du T1 (mai 2026), contre ≈ +28 % pour Strategy — [Yahoo Finance, « Circle Internet Stock Is Up 68% in 2026… »](https://finance.yahoo.com/markets/crypto/articles/circle-internet-stock-68-2026-191551025.html). Au 13/10/2026 : 81,49 $ en séance, plage sur 52 semaines 49,90–147,44 $ ([Robinhood](https://robinhood.com/us/en/stocks/CRCL/), passe 1).
+- Coinbase (COIN) : à –10 % depuis le début de 2026 en avril ; plus bas de l'année à 137,87 $ puis rebond vers 178 $ (article d'août 2026 selon le résumé) — [Yahoo Finance, « Strategy, Coinbase, Circle, Robinhood stocks rally after Treasury news »](https://finance.yahoo.com/markets/crypto/articles/strategy-coinbase-circle-robinhood-stocks-202616660.html) ; [Motley Fool, 21/04/2026](https://www.fool.com/investing/2026/04/21/coinbase-vs-bitcoin-why-the-crypto-stock-is-a-bett/). Clôture à 180,39 $ le 12/10/2026, plage sur 52 semaines 139,11–373,25 $ ([StockAnalysis](https://stockanalysis.com/stocks/coin/), passe 1).
+- Strategy (MSTR) : ≈ +28 % depuis le début de 2026 en mai ; +29 % sur une seule semaine d'août 2026 (« meilleure semaine depuis des années »), alors que Strategy indiquait avoir vendu du bitcoin pour payer des dividendes de préférentielles ; BTC à ≈ 68 000 $ à cette date — [Options Trading Report, août 2026](https://www.optionstradingreport.com/2026/08/crypto-equities-just-had-their-best-week-in-years/) ; [Yahoo Finance](https://finance.yahoo.com/markets/crypto/articles/strategy-coinbase-circle-robinhood-lead-194117279.html). Au 13/10/2026 : 152,26 $, plage sur 52 semaines 81,81–315,95 $ (voir §3).
+- Robinhood (HOOD) : hausse de 2025 d'environ +185 à +190 % selon un résumé ; +13 % sur une semaine d'août 2026 ; 109,22 $ le 12/10/2026 (passe 1) ; pas de rendement 2026 sourcé directement dans cette passe (≈ –3 % depuis le début de l'année par calcul de la passe 1).
+- Galaxy (GLXY) : capitalisation ≈ 7,8 Md$ dans un résumé (date non précisée) ; 19,87 $ le 12/10/2026 pour une plage sur 52 semaines de 16,43–45,92 $ (passe 1) ; pas de rendement 2026 trouvé.
+- Bitcoin : ≈ –10 % depuis le début de 2026 en avril, quand il avait atteint ≈ 77 000 $ (plus haut depuis début février) — [Motley Fool, 21/04/2026](https://www.fool.com/investing/2026/04/21/coinbase-vs-bitcoin-why-the-crypto-stock-is-a-bett/) ; ≈ 68 000 $ en août 2026 — [Yahoo Finance](https://finance.yahoo.com/markets/crypto/articles/strategy-coinbase-circle-robinhood-stocks-202616660.html) ; 83 408 $ le 13/10/2026 — [Fortune](https://fortune.com/article/price-of-bitcoin-10-13-2026/) (passe 1).
+
+**Mineurs et calcul haute performance (relevés de mai à juillet 2026 ; aucun relevé d'octobre trouvé)**
+- 27/05/2026 : Cipher et Hut 8 à des plus hauts historiques ; TeraWulf en hausse d'environ 800 % sur un an, et sa division de calcul haute performance génère pour la première fois plus de chiffre d'affaires trimestriel que son minage de bitcoin — [The Block, 27/05/2026](https://www.theblock.co/news/markets/2026-05-27-bitcoin-miner-ai-boom-stocks-soaring-cipher-hut-8-fresh-highs-402773)
+- 20/07/2026 : Hut 8 gagne jusqu'à 17 % après un bail de 9,8 Md$ sur 15 ans (Beacon Point, Texas) ; IREN gagne jusqu'à 19 % avec 2,8 Md$ de nouveaux contrats cloud — [CoinDesk, 20/07/2026](https://www.coindesk.com/business/2026/07/20/hut-8-surges-on-usd9-8-billion-ai-data-center-lease-lifting-compute-sector)
+- Carnet de commandes de calcul haute performance de Cipher : 9,3 Md$ (accord de 300 MW avec AWS ; accord Fluidstack garanti par Google) — résumé de recherche, source probable [Insights4VC](https://insights4.vc/blog/bitcoin-miners-pivot-to-ai-data-centers/) (non vérifié)
+- Rendements depuis le début de 2026 rapportés : MARA +29,56 % et Riot +47,04 % (un relevé, date non précisée) ; Riot ≈ +90 % (autre relevé, date différente) — résumés de recherche, sources probables [Yahoo Finance](https://finance.yahoo.com/markets/stocks/articles/ai-boom-fuels-massive-rally-140215889.html) / [CCN](https://www.ccn.com/news/crypto/ai-boom-bitcoin-mining-stocks-hut8-cipher-iren-surge/) ; titre d'un article : « Miners Beat Bitcoin by 70% in 2026 as Terawulf Locks $12.8B in AI Contracts » — [Bitcoin.com News](https://news.bitcoin.com/miners-beat-bitcoin-by-70-in-2026-as-terawulf-locks-12-8b-in-ai-contracts/) (date et méthode non vérifiées)
+- Rappel de la passe 1 : 27/07/2026, rotation de l'infrastructure IA vers les actions crypto et recul de certains mineurs ; en juillet, IREN ≈ 45 % sous son plus haut de 2026 — [CNBC, 27/07/2026](https://www.cnbc.com/2026/07/27/crypto-stocks-rally-thanks-to-rotation-from-ai-infrastructure-bitcoin-miners-lag.html) ; [Benzinga, juillet 2026](https://www.benzinga.com/markets/equities/26/07/60268929/bitcoin-mining-stocks-iren-riot-and-mara-slide-as-ai-pivot-faces-fresh-headwinds)
+- Statut des éléments de la passe 1 : « cours actuel de MSTR non trouvé » → **trouvé** (152,26 $ le 13/10/2026) ; « Galaxy cotée au Nasdaq le 16/05/2025 sans levée de fonds » → **[NON VÉRIFIABLE ICI]**.
 
 ### Inferences
-(à compléter)
+Synthèse des cours cités (calculs de ma part ; dates en 2026) :
+
+| Titre | Dernier cours (date) | Plage 52 semaines | Écart au plus haut | Rendement depuis le 01/01/2026 |
+|---|---|---|---|---|
+| Bitcoin | 83 408 $ (13/10) | record 126 198 $ | –34 % | environ –2 % à –4 % (indicatif : point de départ déduit du « –10 % à ≈ 77 000 $ » d'avril, non sourcé directement) |
+| Coinbase (COIN) | 180,39 $ (12/10) | 139,11–373,25 $ | –52 % | ≈ –20 % (calcul de la passe 1) |
+| Robinhood (HOOD) | 109,22 $ (12/10) | non relevée | non relevé | ≈ –3 % (calcul de la passe 1) |
+| Circle (CRCL) | 81,49 $ (13/10) | 49,90–147,44 $ | –45 % | non trouvé |
+| Strategy (MSTR) | 152,26 $ (13/10) | 81,81–315,95 $ | –52 % | non trouvé (+28 % en mai) |
+| Galaxy (GLXY) | 19,87 $ (12/10) | 16,43–45,92 $ | –57 % | non trouvé |
+| BitMine (BMNR) | 24,01 $ (12/10) | non relevée | non relevé | non trouvé |
+| SharpLink (SBET) | 8,44 $ (13/10) | non relevée | non relevé | non trouvé |
+
+- En 2026, détenir des actions « crypto » plutôt que du BTC n'a généralement pas payé, sauf pour les mineurs/IA (et Circle de façon intermittente). Les actions de plateformes et de DAT amplifient les baisses du BTC (écarts au plus haut de 45 % à 57 % contre 34 % pour le BTC).
+- Les mineurs sont le seul segment nettement gagnant, mais pour une raison peu liée à la crypto (contrats d'IA). Les relevés disponibles datent de mai à juillet 2026 ; la rotation de fin juillet montre que ces gains peuvent s'inverser vite. Leur rendement dépend de l'IA plus que du prix du BTC.
 
 ### Gaps
-(à compléter)
+- Cours de clôture au 13/10/2026 et rendements depuis le 01/01/2026 de MARA, Riot, IREN, Cipher, TeraWulf, Hut 8, Core Scientific : non trouvés (seulement des relevés de mai à juillet 2026).
+- Cours de fin 2025 de CRCL, MSTR, GLXY, BMNR et SBET : non trouvés, donc rendements depuis le début de 2026 non calculables pour ces titres.
+- Plus haut historique de Galaxy, eToro, Figure et Gemini : non cherché dans cette passe.
