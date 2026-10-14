@@ -22,9 +22,9 @@ Hashrate Index situe l'indicateur « près des plus bas historiques, dans le bas
 
 | Machine | kWh/jour | Revenu brut/jour à 40 USD/PH | Prix d'équilibre (USD/kWh) à 27,7 / 40 / 51,76 USD/PH | Électricité FR par jour (par an) | EUR/USD maximal pour l'équilibre à 40 USD/PH |
 |---|---|---|---|---|---|
-| S23 Hydro | 132,2 | 23,20 USD | 0,122 / 0,175 / 0,227 | 26,46 € (9 658 €) | 0,877 |
+| S23 Hydro | 132,2 | 23,20 USD | 0,121 / 0,175 / 0,227 | 26,46 € (9 658 €) | 0,877 |
 | S21 XP Hydro | 136,2 | 18,92 USD | 0,096 / 0,139 / 0,180 | 27,26 € (9 949 €) | 0,694 |
-| S21 XP air | 87,5 | 10,80 USD | 0,086 / 0,124 / 0,160 | 17,50 € (6 389 €) | 0,617 |
+| S21 XP air | 87,5 | 10,80 USD | 0,085 / 0,123 / 0,160 | 17,50 € (6 389 €) | 0,617 |
 
 Le prix d'équilibre le plus favorable (0,175 USD/kWh pour le S23 Hydro à 40 USD) reste sous le tarif français : couvrir la seule électricité du S23 Hydro exigerait un hashprice de 45,6 €/PH/jour (57,6 et 64,8 €/PH/jour pour les deux autres machines). La machine ne couvre son électricité que si 1 € vaut au plus 0,877 USD (1,135 au hashprice record d'avril, 51,76 USD ; 0,607 au plancher de juin) : l'EUR/USD d'octobre n'a pas été vérifié, mais la conclusion vaut pour tout taux supérieur à 0,877. S'y ajoutent l'achat de la machine (5 500, 12 299 ou 14 890 USD pour le S23 Hydro selon les annonces de revendeurs ; 9 500-11 500 USD pour le S21 XP Hydro), les frais de pool (non quantifiés) et le refroidissement liquide. L'option Heures creuses n'y change rien : avec 8 h en HC à 0,1589 € et 16 h en HP à 0,2142 € (répartition non sourcée), le S23 Hydro coûte ≈25,89 € par jour contre 26,46 € en Base ([Comparons l'énergie, grille du 02/10/2026](https://www.comparonslenergie.com/prix/tarif-bleu/)). Un S23 Hydro (5,5 kW) sature presque un abonnement 6 kVA, et la Base 9-36 kVA serait fermée aux nouveaux contrats (Selectra, page incohérente sur ce point). Seule une électricité quasi gratuite (surplus solaire non valorisé, chaleur réutilisée à la place d'un chauffage) pourrait changer l'équation ; cette piste, le minage « loterie » de type Bitaxe et le régime fiscal BNC **n'ont pas pu être documentés**.
 
